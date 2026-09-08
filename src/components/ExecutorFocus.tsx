@@ -13,6 +13,7 @@ import {
   FileText,
   FolderKanban,
   Inbox,
+  ImagePlus,
   Lightbulb,
   Link2,
   ListChecks,
@@ -27,9 +28,10 @@ import {
   Send,
   Sparkles,
   Target,
+  Trash2,
   X,
 } from "lucide-react";
-import type { AppNotification, AppState, Task } from "../domain/models";
+import type { AppNotification, AppState, EvidenceAttachment, Task } from "../domain/models";
 import { formatLongDate, formatMinutes, priorityLabel } from "../lib/format";
 
 interface ExecutorFocusProps {
@@ -39,10 +41,10 @@ interface ExecutorFocusProps {
   onToggleStep: (taskId: string, stepId: string) => void;
   onCaptureMemory: (taskId: string, text: string) => void;
   onUpdateReturnPoint: (taskId: string, text: string) => void;
-  onSaveEvidence: (taskId: string, text: string) => void;
+  onSaveEvidence: (taskId: string, text: string, attachment?: EvidenceAttachment) => void;
   onRequestEstimate: (taskId: string, minutes: number, reason: string) => void;
   onBlockTask: (taskId: string, reason: string) => void;
-  onSubmitForReview: (taskId: string, evidence: string) => void;
+  onSubmitForReview: (taskId: string, evidence: string, attachment?: EvidenceAttachment) => void;
   onOpenNotifications: () => void;
 }
 
@@ -224,7 +226,7 @@ export function ExecutorFocus({ state, notifications, onStartTask, onToggleStep,
 
       {estimateOpen && <EstimateDialog task={active} onClose={() => setEstimateOpen(false)} onSubmit={(minutes, reason) => { onRequestEstimate(active.id, minutes, reason); setEstimateOpen(false); }} />}
       {blockOpen && <TextDialog title="O que está bloqueando?" label="Motivo do bloqueio" placeholder="Ex.: Falta acesso à conta do cliente" action="Registrar bloqueio" onClose={() => setBlockOpen(false)} onSubmit={(value) => { onBlockTask(active.id, value); setBlockOpen(false); }} />}
-      {reviewOpen && <TextDialog title="Envie a prova da entrega" label="Link, arquivo ou descrição verificável" placeholder="Cole o link ou descreva onde está o resultado" action="Enviar para validação" onClose={() => setReviewOpen(false)} onSubmit={(value) => { onSubmitForReview(active.id, value); setReviewOpen(false); }} />}
+      {reviewOpen && <EvidenceDialog onClose={() => setReviewOpen(false)} onSubmit={(value, attachment) => { onSubmitForReview(active.id, value, attachment); setReviewOpen(false); }} />}
       {mapOpen && <BrainMapDialog task={active} returnPoint={returnPoint} onToggleStep={onToggleStep} onCaptureMemory={onCaptureMemory} onUpdateReturnPoint={onUpdateReturnPoint} onSaveEvidence={onSaveEvidence} onClose={() => setMapOpen(false)} />}
     </div>
   );
@@ -244,7 +246,7 @@ interface BrainMapDialogProps {
   onToggleStep: (taskId: string, stepId: string) => void;
   onCaptureMemory: (taskId: string, text: string) => void;
   onUpdateReturnPoint: (taskId: string, text: string) => void;
-  onSaveEvidence: (taskId: string, text: string) => void;
+  onSaveEvidence: (taskId: string, text: string, attachment?: EvidenceAttachment) => void;
   onClose: () => void;
 }
 
@@ -443,6 +445,66 @@ function EstimateDialog({ task, onClose, onSubmit }: { task: Task; onClose: () =
 function TextDialog({ title, label, placeholder, action, onClose, onSubmit }: { title: string; label: string; placeholder: string; action: string; onClose: () => void; onSubmit: (value: string) => void }) {
   const [value, setValue] = useState("");
   return <TextModal title={title} onClose={onClose}><label className="field"><span>{label}</span><textarea autoFocus required value={value} onChange={(event) => setValue(event.target.value)} rows={4} placeholder={placeholder} /></label><button className="button primary full" disabled={!value.trim()} onClick={() => onSubmit(value)}>{action}</button></TextModal>;
+}
+
+function EvidenceDialog({ onClose, onSubmit }: { onClose: () => void; onSubmit: (value: string, attachment?: EvidenceAttachment) => void }) {
+  const [value, setValue] = useState("");
+  const [attachment, setAttachment] = useState<EvidenceAttachment>();
+  const [processing, setProcessing] = useState(false);
+  const [error, setError] = useState("");
+
+  async function handleFile(file?: File) {
+    if (!file) return;
+    if (!file.type.startsWith("image/")) {
+      setError("Envie um print em PNG, JPG ou WebP.");
+      return;
+    }
+    setError("");
+    setProcessing(true);
+    try {
+      setAttachment(await compressEvidenceImage(file));
+    } catch {
+      setError("Não foi possível preparar esse print. Tente outra imagem.");
+    } finally {
+      setProcessing(false);
+    }
+  }
+
+  const canSubmit = Boolean(value.trim() || attachment) && !processing;
+  return <TextModal title="Envie a prova da entrega" onClose={onClose}>
+    <label className="field"><span>Descrição ou link da prova <small>(opcional se houver print)</small></span><textarea autoFocus value={value} onChange={(event) => setValue(event.target.value)} rows={3} placeholder="Ex.: campanhas revisadas e print anexado abaixo" /></label>
+    <label className="evidence-upload">
+      <ImagePlus size={21} />
+      <span><strong>{processing ? "Preparando o print…" : attachment ? "Trocar print" : "Anexar print de prova"}</strong><small>PNG, JPG ou WebP. A imagem será reduzida automaticamente.</small></span>
+      <input type="file" accept="image/png,image/jpeg,image/webp" onChange={(event) => { void handleFile(event.target.files?.[0]); event.currentTarget.value = ""; }} />
+    </label>
+    {attachment && <div className="evidence-preview"><img src={attachment.dataUrl} alt="Prévia do print de prova" /><div><strong>{attachment.name}</strong><small>Print pronto para enviar.</small></div><button type="button" onClick={() => setAttachment(undefined)} aria-label="Remover print"><Trash2 size={16} /></button></div>}
+    {error && <p className="form-error">{error}</p>}
+    <p className="dialog-note">A prova ajuda a Pati a validar o que foi entregue sem interromper seu fluxo.</p>
+    <button className="button primary full" disabled={!canSubmit} onClick={() => onSubmit(value.trim(), attachment)}>{processing ? "Preparando…" : "Enviar para validação"}</button>
+  </TextModal>;
+}
+
+function compressEvidenceImage(file: File): Promise<EvidenceAttachment> {
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onerror = () => reject(new Error("read-error"));
+    reader.onload = () => {
+      const image = new Image();
+      image.onerror = () => reject(new Error("image-error"));
+      image.onload = () => {
+        const maxDimension = 1280;
+        const scale = Math.min(1, maxDimension / Math.max(image.naturalWidth, image.naturalHeight));
+        const canvas = document.createElement("canvas");
+        canvas.width = Math.max(1, Math.round(image.naturalWidth * scale));
+        canvas.height = Math.max(1, Math.round(image.naturalHeight * scale));
+        canvas.getContext("2d")?.drawImage(image, 0, 0, canvas.width, canvas.height);
+        resolve({ name: file.name, type: "image/jpeg", dataUrl: canvas.toDataURL("image/jpeg", 0.78) });
+      };
+      image.src = String(reader.result);
+    };
+    reader.readAsDataURL(file);
+  });
 }
 
 function TextModal({ title, onClose, children }: { title: string; onClose: () => void; children: React.ReactNode }) {

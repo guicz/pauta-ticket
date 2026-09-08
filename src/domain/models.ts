@@ -24,6 +24,12 @@ export interface TaskMemoryNote {
   createdAt: string;
 }
 
+export interface EvidenceAttachment {
+  name: string;
+  type: string;
+  dataUrl: string;
+}
+
 export interface Task {
   recurrence?: "none" | "daily" | "weekly" | "monthly";
   recurrenceParentId?: string;
@@ -49,6 +55,7 @@ export interface Task {
   returnPoint?: string;
   blocker?: string;
   evidence?: string;
+  evidenceAttachment?: EvidenceAttachment;
   memoryNotes?: TaskMemoryNote[];
   steps: TaskStep[];
   createdAt: string;

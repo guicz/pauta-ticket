@@ -68,7 +68,7 @@ function SectionTitle({ icon: Icon, title, note }: { icon: typeof Activity; titl
 }
 
 function ReportTask({ task }: { task: Task }) {
-  return <article className="report-task"><span className={`avatar avatar-${task.assignee}`}>{task.assignee === "gui" ? "G" : "P"}</span><div><strong>{task.title}</strong><p>{task.client} · {task.project}</p><small>{task.evidence || task.doneCondition}</small></div><span className="report-time">{formatMinutes(task.actualMinutes ?? task.executorEstimateMinutes ?? task.estimatedMinutes)}</span></article>;
+  return <article className="report-task"><span className={`avatar avatar-${task.assignee}`}>{task.assignee === "gui" ? "G" : "P"}</span><div><strong>{task.title}</strong><p>{task.client} · {task.project}</p><small>{task.evidence || task.doneCondition}</small>{task.evidenceAttachment && <span className="report-proof"><CheckCircle2 size={13} /> Print anexado</span>}</div><span className="report-time">{formatMinutes(task.actualMinutes ?? task.executorEstimateMinutes ?? task.estimatedMinutes)}</span></article>;
 }
 
 function EmptyReport({ text }: { text: string }) { return <div className="report-empty">{text}</div>; }

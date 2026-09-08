@@ -7,7 +7,7 @@ import { WeeklyReport } from "./components/WeeklyReport";
 import { NotificationPanel } from "./components/NotificationPanel";
 import { LoginScreen } from "./components/LoginScreen";
 import { AttendanceRequest } from "./components/AttendanceRequest";
-import type { ActivityEvent, AppNotification, AppState, Person, Task } from "./domain/models";
+import type { ActivityEvent, AppNotification, AppState, EvidenceAttachment, Person, Task } from "./domain/models";
 import { subscribeToWorkspace, saveWorkspace, submitDemandRequest, subscribeToDemandRequests, updateDemandRequest } from "./lib/cloudState";
 import { auth, firebaseConfigured, personFromEmail } from "./lib/firebase";
 import { loadState, resetState, saveState } from "./lib/storage";
@@ -252,11 +252,11 @@ export function App() {
     }));
   }
 
-  function saveEvidence(taskId: string, evidence: string) {
+  function saveEvidence(taskId: string, evidence: string, evidenceAttachment?: EvidenceAttachment) {
     setState((current) => ({
       ...current,
       tasks: current.tasks.map((task) => task.id === taskId
-        ? { ...task, evidence, updatedAt: new Date().toISOString() }
+        ? { ...task, evidence, ...(evidenceAttachment ? { evidenceAttachment } : {}), updatedAt: new Date().toISOString() }
         : task),
       events: [
         appendEvent({ actor: "gui", kind: "progress_recorded", taskId, description: "Evidência preparada para envio." }),
@@ -285,10 +285,10 @@ export function App() {
     }));
   }
 
-  function submitForReview(taskId: string, evidence: string) {
+  function submitForReview(taskId: string, evidence: string, evidenceAttachment?: EvidenceAttachment) {
     setState((current) => ({
       ...current,
-      tasks: current.tasks.map((task) => task.id === taskId ? { ...task, status: "in_review", evidence, updatedAt: new Date().toISOString() } : task),
+      tasks: current.tasks.map((task) => task.id === taskId ? { ...task, status: "in_review", evidence, ...(evidenceAttachment ? { evidenceAttachment } : {}), updatedAt: new Date().toISOString() } : task),
       events: [appendEvent({ actor: "gui", kind: "sent_to_review", taskId, description: "Tarefa enviada para validação." }), ...current.events],
       notifications: [appendNotification({ recipient: "pati", level: "normal", title: "Entrega para validar", message: "Gui enviou uma tarefa com evidência." }), ...current.notifications],
     }));
