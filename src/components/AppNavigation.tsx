@@ -10,7 +10,7 @@ import {
 } from "lucide-react";
 import type { AppNotification, Person } from "../domain/models";
 
-export type AppView = "overview" | "queue" | "focus" | "report";
+export type AppView = "overview" | "queue" | "focus" | "report" | "request";
 
 interface AppNavigationProps {
   person: Person;
@@ -44,7 +44,10 @@ export function AppNavigation({
   const guiItems: Array<{ id: AppView; label: string; icon: typeof Focus }> = [
     { id: "focus", label: "Meu agora", icon: Focus },
   ];
-  const items = person === "pati" ? managerItems : guiItems;
+  const attendanceItems: Array<{ id: AppView; label: string; icon: typeof Focus }> = [
+    { id: "request", label: "Pedir demanda", icon: ClipboardList },
+  ];
+  const items = person === "pati" ? managerItems : person === "gui" ? guiItems : attendanceItems;
 
   return (
     <aside className="app-sidebar" aria-label="Navegação principal">
@@ -80,8 +83,8 @@ export function AppNavigation({
         <div className="profile-switch" aria-label="Alternar visão">
           <UserRound size={18} aria-hidden="true" />
           <div>
-            <span>{person === "pati" ? "Pati" : "Guilherme"}</span>
-            <small>{syncLabel ?? (person === "pati" ? "Gestão" : "Execução")}</small>
+            <span>{person === "pati" ? "Pati" : person === "gui" ? "Guilherme" : "Atendimento"}</span>
+            <small>{syncLabel ?? (person === "pati" ? "Gestão" : person === "gui" ? "Execução" : "Solicitações")}</small>
           </div>
           {allowPersonSwitch ? (
             <button

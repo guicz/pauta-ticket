@@ -6,10 +6,12 @@ import { ExecutorFocus } from "./components/ExecutorFocus";
 import { WeeklyReport } from "./components/WeeklyReport";
 import { NotificationPanel } from "./components/NotificationPanel";
 import { LoginScreen } from "./components/LoginScreen";
+import { AttendanceRequest } from "./components/AttendanceRequest";
 import type { ActivityEvent, AppNotification, AppState, Person, Task } from "./domain/models";
-import { subscribeToWorkspace, saveWorkspace } from "./lib/cloudState";
+import { subscribeToWorkspace, saveWorkspace, submitDemandRequest, subscribeToDemandRequests, updateDemandRequest } from "./lib/cloudState";
 import { auth, firebaseConfigured, personFromEmail } from "./lib/firebase";
 import { loadState, resetState, saveState } from "./lib/storage";
+import { nextOccurrence } from "./domain/recurrence";
 
 const id = (prefix: string) => `${prefix}-${Date.now()}-${Math.random().toString(16).slice(2)}`;
 
@@ -41,11 +43,15 @@ export function App() {
       setSyncLabel("Demonstração local");
       return;
     }
-    if (!user) return;
+    if (!user || person === "atendimento") {
+      setCloudReady(false);
+      setSyncLabel(person === "atendimento" ? "Solicitações" : "Aguardando login");
+      return;
+    }
 
     setCloudReady(false);
     setSyncLabel("Sincronizando…");
-    return subscribeToWorkspace(
+    const workspaceUnsubscribe = subscribeToWorkspace(
       (remoteState) => {
         const serialized = JSON.stringify(remoteState);
         lastCloudState.current = serialized;
@@ -55,7 +61,17 @@ export function App() {
       },
       () => setSyncLabel("Falha de sincronização"),
     );
-  }, [demoMode, user]);
+    const requestsUnsubscribe = person === "pati"
+      ? subscribeToDemandRequests((requests) => {
+          setState((current) => {
+            const known = new Set(current.tasks.map((task) => task.id));
+            const newRequests = requests.filter((task) => !known.has(task.id));
+            return newRequests.length ? { ...current, tasks: [...current.tasks, ...newRequests] } : current;
+          });
+        }, () => setSyncLabel("Falha ao carregar solicitações"))
+      : () => undefined;
+    return () => { workspaceUnsubscribe(); requestsUnsubscribe(); };
+  }, [demoMode, person, user]);
 
   useEffect(() => {
     if (demoMode) {
@@ -102,7 +118,8 @@ export function App() {
 
   function createTask(task: Omit<Task, "id" | "createdAt" | "updatedAt">) {
     const now = new Date().toISOString();
-    const nextTask: Task = { ...task, id: id("task"), createdAt: now, updatedAt: now };
+    const nextTask: Task = { ...task, id: id("task"), assignee: person === "atendimento" ? "pati" : task.assignee, requester: person === "atendimento" ? "atendimento" : task.requester, status: person === "atendimento" ? "inbox" : task.status, createdAt: now, updatedAt: now };
+    if (person === "atendimento" && !demoMode) void submitDemandRequest(nextTask);
     setState((current) => ({
       ...current,
       tasks: [...current.tasks, nextTask],
@@ -114,8 +131,8 @@ export function App() {
         appendNotification({
           recipient: nextTask.assignee,
           level: "quiet",
-          title: "Nova demanda registrada",
-          message: `${nextTask.title} entrou na fila sem alterar sua tarefa atual.`,
+          title: nextTask.requester === "atendimento" ? "Nova solicitação de atendimento" : "Nova demanda registrada",
+          message: nextTask.requester === "atendimento" ? `${nextTask.title} aguarda sua triagem.` : `${nextTask.title} entrou na fila sem alterar sua tarefa atual.`,
         }),
         ...current.notifications,
       ],
@@ -129,6 +146,22 @@ export function App() {
         task.id === taskId ? { ...task, ...changes, updatedAt: new Date().toISOString() } : task,
       ),
     }));
+  }
+
+  function forwardTask(taskId: string) {
+    const now = new Date().toISOString();
+    setState((current) => {
+      const target = current.tasks.find((task) => task.id === taskId);
+      if (!target || target.status !== "inbox") return current;
+      const forwarded = { ...target, assignee: "gui" as const, status: "ready" as const, updatedAt: now };
+      if (!demoMode) void updateDemandRequest(forwarded);
+      return {
+        ...current,
+        tasks: current.tasks.map((task) => task.id === taskId ? forwarded : task),
+        events: [appendEvent({ actor: "pati", kind: "task_created", taskId, description: `Solicitação encaminhada ao Gui: ${target.title}.` }), ...current.events],
+        notifications: [appendNotification({ recipient: "gui", level: "normal", title: "Nova tarefa na sua fila", message: `${target.title} foi organizada pela Pati e está pronta para entrar na pauta.` }), ...current.notifications],
+      };
+    });
   }
 
   function publishAgenda() {
@@ -261,10 +294,33 @@ export function App() {
     const now = new Date().toISOString();
     setState((current) => ({
       ...current,
-      tasks: current.tasks.map((task) => task.id === taskId ? { ...task, status: "completed", completedAt: now, updatedAt: now } : task),
+      tasks: (() => {
+        const target = current.tasks.find((task) => task.id === taskId);
+        const next = target?.status === "in_review" ? nextOccurrence(target, current.tasks, new Date(now)) : null;
+        const updated = current.tasks.map((task) => task.id === taskId ? { ...task, status: "completed" as const, completedAt: now, updatedAt: now } : task);
+        return next ? [...updated, next] : updated;
+      })(),
       events: [appendEvent({ actor: "pati", kind: "task_completed", taskId, description: "Entrega conferida e concluída." }), ...current.events],
       notifications: [appendNotification({ recipient: "gui", level: "quiet", title: "Entrega aprovada", message: "A tarefa foi conferida e concluída." }), ...current.notifications],
     }));
+  }
+
+  function returnTask(taskId: string, reason: string) {
+    const now = new Date().toISOString();
+    setState((current) => {
+      const target = current.tasks.find((task) => task.id === taskId);
+      if (!target || !["in_review", "completed"].includes(target.status) || !reason.trim()) return current;
+      return {
+        ...current,
+        tasks: current.tasks.map((task) => {
+          if (task.id !== taskId) return task;
+          const { completedAt, ...rest } = task;
+          return { ...rest, status: "ready" as const, scheduledDate: task.scheduledDate || now.slice(0, 10), returnPoint: `Ajuste solicitado pela Pati: ${reason}`, updatedAt: now, steps: [...task.steps, { id: id("adjustment"), label: `Ajustar: ${reason}`, done: false }] };
+        }),
+        events: [appendEvent({ actor: "pati", kind: "task_interrupted", taskId, description: `Demanda devolvida para ajustes: ${reason}` }), ...current.events],
+        notifications: [appendNotification({ recipient: target.assignee, level: "normal", title: "Demanda devolvida para ajustes", message: `${target.title}: ${reason}` }), ...current.notifications],
+      };
+    });
   }
 
   function markNotificationsRead() {
@@ -310,10 +366,13 @@ export function App() {
             onCreateTask={createTask}
             onPublishAgenda={publishAgenda}
             onApproveTask={approveTask}
+            onReturnTask={returnTask}
+            onForwardTask={forwardTask}
             onUpdateTask={updateTask}
           />
         )}
         {person === "pati" && view === "report" && <WeeklyReport state={state} />}
+        {person === "atendimento" && <AttendanceRequest onCreate={createTask} />}
         {person === "gui" && (
           <ExecutorFocus
             state={state}

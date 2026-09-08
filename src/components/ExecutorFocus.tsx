@@ -30,7 +30,7 @@ import {
   X,
 } from "lucide-react";
 import type { AppNotification, AppState, Task } from "../domain/models";
-import { formatLongDate, formatMinutes } from "../lib/format";
+import { formatLongDate, formatMinutes, priorityLabel } from "../lib/format";
 
 interface ExecutorFocusProps {
   state: AppState;
@@ -55,7 +55,9 @@ export function ExecutorFocus({ state, notifications, onStartTask, onToggleStep,
   const [memorySaved, setMemorySaved] = useState(false);
   const unread = notifications.filter((notification) => !notification.read).length;
   const tasks = state.tasks.filter((task) => task.assignee === "gui" && !["completed", "in_review"].includes(task.status));
-  const active = tasks.find((task) => task.status === "active") ?? tasks.find((task) => task.scheduledDate && task.status === "ready");
+  const date = new Date();
+  const today = `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, "0")}-${String(date.getDate()).padStart(2, "0")}`;
+  const active = tasks.find((task) => task.status === "active") ?? tasks.find((task) => task.scheduledDate && task.scheduledDate <= today && ["ready", "partial", "paused"].includes(task.status));
   const next = tasks.find((task) => task.id !== active?.id && ["ready", "partial", "paused"].includes(task.status));
 
   if (!active) {
@@ -91,10 +93,12 @@ export function ExecutorFocus({ state, notifications, onStartTask, onToggleStep,
       <FocusHeader unread={unread} onOpenNotifications={onOpenNotifications} />
 
       <div className="focus-layout">
-        <section className="now-card">
+        <section className={`now-card demand-priority-${active.priority}`}>
           <header className="now-header">
             <div><span className="now-pulse" /><span className="eyebrow">AGORA</span></div>
+            <span className="priority-badge">Prioridade {priorityLabel(active.priority)}</span>
             <span className="client-chip">{active.client}</span>
+            {active.scheduledStart && <span className="client-chip">{active.scheduledStart}{active.scheduledEnd ? `–${active.scheduledEnd}` : ""}</span>}
           </header>
 
           <div className="now-title">
@@ -206,8 +210,9 @@ export function ExecutorFocus({ state, notifications, onStartTask, onToggleStep,
               </div>
             )}
           </section>
-          <div className="next-card">
+          <div className={`next-card ${next ? `demand-priority-${next.priority}` : ""}`}>
             <span className="eyebrow">DEPOIS</span>
+            {next && <span className="priority-badge">Prioridade {priorityLabel(next.priority)}</span>}
             {next ? <><h2>{next.title}</h2><p>{next.client} · {formatMinutes(next.executorEstimateMinutes ?? next.estimatedMinutes)}</p><small>A ordem pode mudar após a revisão da pauta.</small></> : <p>Nenhuma tarefa na sequência.</p>}
           </div>
           <div className="focus-rule"><AlertCircle size={17} /><p>Novas demandas entram na fila sem substituir esta tarefa.</p></div>

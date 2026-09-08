@@ -1,5 +1,6 @@
-import { doc, onSnapshot, serverTimestamp, setDoc, type Unsubscribe } from "firebase/firestore";
+import { collection, doc, onSnapshot, serverTimestamp, setDoc, type Unsubscribe } from "firebase/firestore";
 import type { AppState } from "../domain/models";
+import type { Task } from "../domain/models";
 import { seedState } from "../data/seed";
 import { db } from "./firebase";
 
@@ -42,4 +43,21 @@ export function subscribeToWorkspace(
 export async function saveWorkspace(state: AppState): Promise<void> {
   if (!db) return;
   await setDoc(doc(db, "workspaces", WORKSPACE_ID), { ...state, syncedAt: serverTimestamp() });
+}
+
+export async function submitDemandRequest(task: Task): Promise<void> {
+  if (!db) return;
+  await setDoc(doc(db, "demandRequests", task.id), { ...task, syncedAt: serverTimestamp() });
+}
+
+export async function updateDemandRequest(task: Task): Promise<void> {
+  if (!db) return;
+  await setDoc(doc(db, "demandRequests", task.id), { ...task, syncedAt: serverTimestamp() });
+}
+
+export function subscribeToDemandRequests(onTasks: (tasks: Task[]) => void, onError: (message: string) => void): Unsubscribe {
+  if (!db) return () => undefined;
+  return onSnapshot(collection(db, "demandRequests"), (snapshot) => {
+    onTasks(snapshot.docs.map((item) => item.data() as Task));
+  }, (error) => onError(error.message));
 }

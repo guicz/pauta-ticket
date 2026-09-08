@@ -10,7 +10,7 @@ export type TaskStatus =
 
 export type Priority = "urgent" | "high" | "normal" | "low";
 export type Shift = "morning" | "afternoon" | null;
-export type Person = "pati" | "gui";
+export type Person = "pati" | "gui" | "atendimento";
 
 export interface TaskStep {
   id: string;
@@ -25,6 +25,8 @@ export interface TaskMemoryNote {
 }
 
 export interface Task {
+  recurrence?: "none" | "daily" | "weekly" | "monthly";
+  recurrenceParentId?: string;
   id: string;
   title: string;
   client: string;
@@ -41,6 +43,8 @@ export interface Task {
   deadline?: string;
   consequence?: string;
   scheduledDate?: string;
+  scheduledStart?: string;
+  scheduledEnd?: string;
   shift: Shift;
   returnPoint?: string;
   blocker?: string;

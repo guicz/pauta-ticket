@@ -1,4 +1,23 @@
 /* Shared glass surfaces: opaque enough for legibility, with a brighter rim. */
+.demand-priority-urgent { --priority-color: #a42a40; --priority-tint: #fbe4e8; }
+.demand-priority-high { --priority-color: #985006; --priority-tint: #fff0d9; }
+.demand-priority-normal { --priority-color: #255d9a; --priority-tint: #e5effc; }
+.demand-priority-low { --priority-color: #53616c; --priority-tint: #eaf0f3; }
+.mini-task[class*="demand-priority-"], .now-card[class*="demand-priority-"], .next-card[class*="demand-priority-"] {
+  border-left: 5px solid var(--priority-color);
+}
+.now-card[class*="demand-priority-"] .now-header { background: var(--priority-tint); flex-wrap: wrap; gap: .5rem; }
+.priority-badge { display: inline-flex; align-items: center; padding: .35rem .65rem; border-radius: 999px; color: var(--priority-color); background: var(--priority-tint); font-size: .7rem; font-weight: 800; }
+.next-card .priority-badge { margin-left: .5rem; }
+.task-table tr[class*="demand-priority-"] td:first-child { border-left: 4px solid var(--priority-color); background: var(--priority-tint); }
+.task-table .inline-select[class*="priority-"] { color: var(--priority-color); background-color: var(--priority-tint); border-color: var(--priority-color); }
+.schedule-times { display: flex; align-items: center; gap: .2rem; margin-top: .35rem; }
+.schedule-times input { width: 5.8rem; border: 1px solid rgba(74, 111, 91, .25); border-radius: .65rem; padding: .3rem; color: #3d5146; background: rgba(255,255,255,.72); font-size: .68rem; }
+.attendance-page { max-width: 70rem; }
+.attendance-lock { display: inline-flex; align-items: center; gap: .45rem; padding: .65rem .85rem; border: 1px solid rgba(255,255,255,.75); border-radius: 999px; color: #286653; background: rgba(226,244,233,.72); font-size: .75rem; font-weight: 750; }
+.attendance-card { overflow: hidden; border: var(--glass-border); border-radius: 2rem; background: linear-gradient(135deg, rgba(255,255,255,.72), rgba(255,255,255,.4)); box-shadow: var(--shadow); backdrop-filter: blur(24px); }
+.attendance-card .task-form { max-width: 48rem; }
+.request-success { grid-column: 1 / -1; margin: 0; padding: .8rem 1rem; border-radius: 1rem; color: #226148; background: #e2f4e8; font-size: .78rem; font-weight: 700; }
 :root {
   --radius-sm: 1rem;
   --radius-md: 1.5rem;

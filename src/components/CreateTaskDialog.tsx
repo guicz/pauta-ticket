@@ -18,6 +18,9 @@ export function CreateTaskDialog({ onClose, onCreate }: CreateTaskDialogProps) {
   const [priority, setPriority] = useState<Priority>("normal");
   const [assignee, setAssignee] = useState<Person>("gui");
   const [shift, setShift] = useState<Shift>(null);
+  const [start, setStart] = useState("");
+  const [end, setEnd] = useState("");
+  const [recurrence, setRecurrence] = useState<Task["recurrence"]>("none");
 
   function submit(event: FormEvent) {
     event.preventDefault();
@@ -36,6 +39,9 @@ export function CreateTaskDialog({ onClose, onCreate }: CreateTaskDialogProps) {
       estimatedMinutes: estimate,
       scheduledDate,
       shift,
+      scheduledStart: start || undefined,
+      scheduledEnd: end || undefined,
+      recurrence,
       steps: steps
         .split("\n")
         .map((label) => label.trim())
@@ -122,7 +128,10 @@ export function CreateTaskDialog({ onClose, onCreate }: CreateTaskDialogProps) {
               <option value="afternoon">Tarde de hoje</option>
             </select>
           </label>
+          <label className="field"><span>Horário de início</span><input type="time" value={start} onChange={(event) => setStart(event.target.value)} /><small>Use junto com manhã ou tarde para montar a pauta.</small></label>
+          <label className="field"><span>Horário de término</span><input type="time" value={end} min={start || undefined} onChange={(event) => setEnd(event.target.value)} /><small>O intervalo continua protegido dentro do turno.</small></label>
 
+          <label className="field field-wide"><span>Repetição</span><select value={recurrence} onChange={(event) => setRecurrence(event.target.value as Task["recurrence"])}><option value="none">Não repetir</option><option value="daily">Diária</option><option value="weekly">Semanal</option><option value="monthly">Mensal</option></select><small>A próxima ocorrência será criada após a aprovação: um dia, uma semana ou um mês depois. Não interrompe a tarefa atual.</small></label>
           <footer className="dialog-actions field-wide">
             <button type="button" className="button secondary" onClick={onClose}>Cancelar</button>
             <button type="submit" className="button primary">Adicionar demanda</button>

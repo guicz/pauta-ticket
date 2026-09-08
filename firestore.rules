@@ -14,6 +14,12 @@ service cloud.firestore {
       allow read, write: if isTeamMember();
     }
 
+    match /demandRequests/{requestId} {
+      allow create: if request.auth != null;
+      allow read, update: if request.auth != null
+        && request.auth.token.email == 'patricia@dg5.com.br';
+    }
+
     match /{document=**} {
       allow read, write: if false;
     }

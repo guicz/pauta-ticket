@@ -21,5 +21,9 @@ export const db = app ? initializeFirestore(app, { ignoreUndefinedProperties: tr
 
 export function personFromEmail(email: string | null): Person {
   const patiEmail = import.meta.env.VITE_PATI_EMAIL?.trim().toLowerCase();
-  return email?.trim().toLowerCase() === patiEmail ? "pati" : "gui";
+  const guiEmail = (import.meta.env.VITE_GUI_EMAIL ?? "guilherme@dg5.com.br").trim().toLowerCase();
+  const normalized = email?.trim().toLowerCase();
+  if (normalized === patiEmail) return "pati";
+  if (normalized === guiEmail) return "gui";
+  return "atendimento";
 }
