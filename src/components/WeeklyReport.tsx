@@ -64,7 +64,7 @@ export function WeeklyReport({ state }: { state: AppState }) {
 }
 
 function SectionTitle({ icon: Icon, title, note }: { icon: typeof Activity; title: string; note: string }) {
-  return <header className="report-section-title"><span><Icon size={18} /></span><div><h2>{title}</h2><p>{note}</p></div></header>;
+  return <header className="report-section-title"><span><Icon size={18} /></span><div><h2>{title}</h2></div><button className="tooltip-anchor" data-tooltip={note} aria-label={`Mais informações sobre ${title}`}>i</button></header>;
 }
 
 function ReportTask({ task }: { task: Task }) {

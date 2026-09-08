@@ -111,10 +111,9 @@ export function ExecutorFocus({ state, notifications, onStartTask, onToggleStep,
             <h1>{active.title}</h1>
           </div>
 
-          <section className="next-action-card" aria-label="Próxima ação">
+          <section className="next-action-card" aria-label="Próxima ação" data-tooltip={nextStep ? "Concentre-se somente neste passo. As outras etapas podem esperar." : active.doneCondition}>
             <span className="eyebrow">{completedSteps ? "CONTINUE DAQUI" : "COMECE POR AQUI"}</span>
             <h2>{nextStep?.label ?? "Prepare a prova da entrega"}</h2>
-            <p>{nextStep ? "Concentre-se apenas neste passo. O restante pode esperar." : active.doneCondition}</p>
             {active.status === "active" && nextStep && <button className="button primary" onClick={() => onToggleStep(active.id, nextStep.id)}><Check size={17} /> Concluí este passo</button>}
             {active.status === "active" && !nextStep && <button className="button primary" onClick={() => setReviewOpen(true)}><Send size={17} /> Preparar envio</button>}
           </section>
@@ -126,9 +125,9 @@ export function ExecutorFocus({ state, notifications, onStartTask, onToggleStep,
             </div>
           ) : (
             <>
-              <div className="reason-box">
+              <div className="reason-box" data-tooltip={active.consequence || active.expectedResult}>
                 <Sparkles size={18} />
-                <div><strong>Por que agora</strong><p>{active.consequence || active.expectedResult}</p></div>
+                <div><strong>Por que agora</strong></div>
               </div>
 
               <div className="done-condition"><span>PRONTO QUANDO</span><p>{active.doneCondition}</p></div>
@@ -177,9 +176,9 @@ export function ExecutorFocus({ state, notifications, onStartTask, onToggleStep,
               <div><span>ONDE VOCÊ PAROU</span><p>{returnPoint}</p></div>
             </div>
 
-            <button className="brain-map-trigger" onClick={() => setMapOpen(true)}>
+            <button className="brain-map-trigger" onClick={() => setMapOpen(true)} data-tooltip="Abra a visão visual com memórias, objetivo, rotina e evidências desta tarefa.">
               <Network size={17} />
-              <span><strong>Ver mapa desta tarefa</strong><small>Memórias e relações em uma visão</small></span>
+              <span><strong>Ver mapa desta tarefa</strong></span>
               <ChevronRight size={17} />
             </button>
 
@@ -193,8 +192,7 @@ export function ExecutorFocus({ state, notifications, onStartTask, onToggleStep,
             </details>
 
             <div className="brain-capture">
-              <label htmlFor="memory-capture"><Inbox size={16} /><span>Surgiu outra coisa?</span></label>
-              <p>Guarde aqui. Sua tarefa atual continua a mesma.</p>
+              <label htmlFor="memory-capture" data-tooltip="Registre uma ideia para depois sem trocar a tarefa atual."><Inbox size={16} /><span>Surgiu outra coisa?</span></label>
               <div className="capture-row">
                 <input
                   id="memory-capture"
@@ -215,12 +213,12 @@ export function ExecutorFocus({ state, notifications, onStartTask, onToggleStep,
               </div>
             )}
           </section>
-          <div className={`next-card ${next ? `demand-priority-${next.priority}` : ""}`}>
+          <div className={`next-card ${next ? `demand-priority-${next.priority}` : ""}`} data-tooltip={next ? "A ordem desta tarefa pode ser revisada pela Pati." : "A fila está vazia depois da tarefa atual."}>
             <span className="eyebrow">{next && ["urgent", "high"].includes(next.priority) ? "PRÓXIMA PRIORIDADE" : "DEPOIS"}</span>
             {next && <span className="priority-badge">Prioridade {priorityLabel(next.priority)}</span>}
-            {next ? <><h2>{next.title}</h2><p>{next.client} · {formatMinutes(next.executorEstimateMinutes ?? next.estimatedMinutes)}</p><small>A ordem pode mudar após a revisão da pauta.</small></> : <p>Nenhuma tarefa na sequência.</p>}
+            {next ? <><h2>{next.title}</h2><p>{next.client} · {formatMinutes(next.executorEstimateMinutes ?? next.estimatedMinutes)}</p></> : <p>Nenhuma tarefa na sequência.</p>}
           </div>
-          <div className="focus-rule"><AlertCircle size={17} /><p>Novas demandas entram na fila sem substituir esta tarefa.</p></div>
+          <div className="focus-rule" data-tooltip="Novas demandas entram na fila, mas nunca substituem a tarefa que você iniciou."><AlertCircle size={17} /><span className="sr-only">Novas demandas não substituem a tarefa atual.</span></div>
         </aside>
       </div>
 
