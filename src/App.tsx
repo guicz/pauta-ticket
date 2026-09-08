@@ -26,6 +26,7 @@ export function App() {
   const [cloudReady, setCloudReady] = useState(false);
   const [syncLabel, setSyncLabel] = useState("Conectando…");
   const lastCloudState = useRef("");
+  const demandRequestsRef = useRef<Task[]>([]);
 
   const person = demoMode ? demoPerson : personFromEmail(user?.email ?? null);
 
@@ -53,9 +54,11 @@ export function App() {
     setSyncLabel("Sincronizando…");
     const workspaceUnsubscribe = subscribeToWorkspace(
       (remoteState) => {
-        const serialized = JSON.stringify(remoteState);
+        const known = new Set(remoteState.tasks.map((task) => task.id));
+        const mergedState = { ...remoteState, tasks: [...remoteState.tasks, ...demandRequestsRef.current.filter((task) => !known.has(task.id))] };
+        const serialized = JSON.stringify(mergedState);
         lastCloudState.current = serialized;
-        setState((current) => JSON.stringify(current) === serialized ? current : remoteState);
+        setState((current) => JSON.stringify(current) === serialized ? current : mergedState);
         setCloudReady(true);
         setSyncLabel("Sincronizado");
       },
@@ -63,6 +66,7 @@ export function App() {
     );
     const requestsUnsubscribe = person === "pati"
       ? subscribeToDemandRequests((requests) => {
+          demandRequestsRef.current = requests;
           setState((current) => {
             const known = new Set(current.tasks.map((task) => task.id));
             const newRequests = requests.filter((task) => !known.has(task.id));
