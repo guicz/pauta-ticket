@@ -54,7 +54,10 @@ export function ExecutorFocus({ state, notifications, onStartTask, onToggleStep,
   const [memoryDraft, setMemoryDraft] = useState("");
   const [memorySaved, setMemorySaved] = useState(false);
   const unread = notifications.filter((notification) => !notification.read).length;
-  const tasks = state.tasks.filter((task) => task.assignee === "gui" && !["completed", "in_review"].includes(task.status));
+  const priorityOrder = { urgent: 0, high: 1, normal: 2, low: 3 } as const;
+  const tasks = state.tasks
+    .filter((task) => task.assignee === "gui" && !["completed", "in_review"].includes(task.status))
+    .sort((left, right) => priorityOrder[left.priority] - priorityOrder[right.priority]);
   const date = new Date();
   const today = `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, "0")}-${String(date.getDate()).padStart(2, "0")}`;
   const active = tasks.find((task) => task.status === "active") ?? tasks.find((task) => task.scheduledDate && task.scheduledDate <= today && ["ready", "partial", "paused"].includes(task.status));
@@ -211,7 +214,7 @@ export function ExecutorFocus({ state, notifications, onStartTask, onToggleStep,
             )}
           </section>
           <div className={`next-card ${next ? `demand-priority-${next.priority}` : ""}`}>
-            <span className="eyebrow">DEPOIS</span>
+            <span className="eyebrow">{next && ["urgent", "high"].includes(next.priority) ? "PRÓXIMA PRIORIDADE" : "DEPOIS"}</span>
             {next && <span className="priority-badge">Prioridade {priorityLabel(next.priority)}</span>}
             {next ? <><h2>{next.title}</h2><p>{next.client} · {formatMinutes(next.executorEstimateMinutes ?? next.estimatedMinutes)}</p><small>A ordem pode mudar após a revisão da pauta.</small></> : <p>Nenhuma tarefa na sequência.</p>}
           </div>

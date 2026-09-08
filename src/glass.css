@@ -9,6 +9,8 @@
 .now-card[class*="demand-priority-"] .now-header { background: var(--priority-tint); flex-wrap: wrap; gap: .5rem; }
 .priority-badge { display: inline-flex; align-items: center; padding: .35rem .65rem; border-radius: 999px; color: var(--priority-color); background: var(--priority-tint); font-size: .7rem; font-weight: 800; }
 .next-card .priority-badge { margin-left: .5rem; }
+.next-card.demand-priority-urgent, .next-card.demand-priority-high { background: linear-gradient(135deg, rgba(255,246,224,.9), rgba(255,255,255,.58)); box-shadow: 0 12px 28px rgba(150,87,10,.14), inset 0 1px 0 #fff; }
+.next-card.demand-priority-urgent h2, .next-card.demand-priority-high h2 { font-size: 1.16rem; color: #73420b; }
 .task-table tr[class*="demand-priority-"] td:first-child { border-left: 4px solid var(--priority-color); background: var(--priority-tint); }
 .task-table .inline-select[class*="priority-"] { color: var(--priority-color); background-color: var(--priority-tint); border-color: var(--priority-color); }
 .schedule-times { display: flex; align-items: center; gap: .2rem; margin-top: .35rem; }
@@ -18,6 +20,22 @@
 .attendance-card { overflow: hidden; border: var(--glass-border); border-radius: 2rem; background: linear-gradient(135deg, rgba(255,255,255,.72), rgba(255,255,255,.4)); box-shadow: var(--shadow); backdrop-filter: blur(24px); }
 .attendance-card .task-form { max-width: 48rem; }
 .request-success { grid-column: 1 / -1; margin: 0; padding: .8rem 1rem; border-radius: 1rem; color: #226148; background: #e2f4e8; font-size: .78rem; font-weight: 700; }
+.focus-page { font-size: 1.06rem; }
+.focus-page .eyebrow { font-size: .76rem; }
+.focus-page .focus-top p { font-size: .94rem; }
+.focus-page .client-chip, .focus-page .priority-badge { font-size: .82rem; padding: .42rem .72rem; }
+.focus-page .now-title p { font-size: .9rem; }
+.focus-page .now-title h1 { font-size: clamp(2rem, 4.5vw, 3.15rem); }
+.focus-page .next-action-card h2 { font-size: 1.5rem; }
+.focus-page .next-action-card p, .focus-page .reason-box p { font-size: .95rem; }
+.focus-page .done-condition p { font-size: 1.08rem; }
+.focus-page .check-row { min-height: 3.35rem; font-size: .96rem; }
+.focus-page .checklist-head, .focus-page .time-strip span, .focus-page .time-strip button { font-size: .82rem; }
+.focus-page .time-strip strong { font-size: .98rem; }
+.focus-page .button { font-size: .9rem; }
+.focus-page .brain-card h2, .focus-page .next-card h2 { font-size: 1.16rem; }
+.focus-page .brain-return p, .focus-page .brain-capture p, .focus-page .next-card p, .focus-page .next-card small, .focus-page .focus-rule p { font-size: .82rem; }
+.focus-page .brain-map-trigger, .focus-page .brain-context summary { font-size: .86rem; }
 :root {
   --radius-sm: 1rem;
   --radius-md: 1.5rem;
