@@ -1,0 +1,108 @@
+/* Shared glass surfaces: opaque enough for legibility, with a brighter rim. */
+:root {
+  --radius-sm: 1rem;
+  --radius-md: 1.5rem;
+  --radius-lg: 2rem;
+  --muted: #52665e;
+  --glass-border: 1px solid rgba(255, 255, 255, .85);
+  --shadow: 0 12px 36px rgba(30, 69, 55, .08), inset 0 1px 0 #ffffff;
+}
+body {
+  background:
+    radial-gradient(ellipse at 0% 15%, #a9d2bf 0, transparent 48%),
+    radial-gradient(ellipse at 100% 0%, #f2dfb9 0, transparent 45%),
+    radial-gradient(ellipse at 85% 95%, #b8d8d4 0, transparent 50%),
+    #e8efe8;
+  background-attachment: fixed;
+}
+body::before { opacity: .14; background-size: 4rem 4rem; }
+.app-frame { gap: 1rem; padding: 1rem; }
+.page { padding-top: 1.5rem; }
+.page-header, .focus-top {
+  padding: 1.4rem 1.5rem;
+  border: var(--glass-border);
+  border-radius: 1.75rem;
+  background: linear-gradient(120deg, rgba(255,255,255,.68), rgba(255,255,255,.3));
+  box-shadow: var(--shadow);
+  -webkit-backdrop-filter: blur(22px);
+  backdrop-filter: blur(22px);
+}
+.app-sidebar {
+  top: 1rem;
+  height: calc(100vh - 2rem);
+  border-radius: 2rem;
+  background: linear-gradient(155deg, rgba(28,83,66,.91), rgba(13,49,43,.88));
+  border-color: rgba(255,255,255,.35);
+  -webkit-backdrop-filter: blur(28px);
+  backdrop-filter: blur(28px);
+}
+.nav-item, .notification-shortcut, .profile-switch { border-radius: 1.2rem; }
+.nav-item.active { background: linear-gradient(115deg, rgba(255,255,255,.22), rgba(255,255,255,.08)); border-color: rgba(255,255,255,.25); }
+.metric-card, .planner-section, .queue-section, .now-card,
+.brain-card, .next-card, .report-section, .report-summary, .quiet-notice {
+  border: var(--glass-border);
+  background: linear-gradient(135deg, rgba(255,255,255,.76), rgba(255,255,255,.43));
+  box-shadow: var(--shadow);
+  -webkit-backdrop-filter: blur(24px) saturate(125%);
+  backdrop-filter: blur(24px) saturate(125%);
+  border-radius: var(--radius-lg);
+}
+.metric-card { border-radius: 1.5rem; min-height: 6.5rem; }
+.metric-icon { border: 1px solid rgba(255,255,255,.8); box-shadow: inset 0 1px 0 #fff; }
+.planner-section, .queue-section { padding: 1.5rem; }
+.shift-column { border-radius: 1.5rem; background: rgba(243,249,244,.45); }
+.shift-tasks { gap: .65rem; }
+.mini-task { border-radius: 1.15rem; padding: .85rem; background: rgba(255,255,255,.7); }
+.mini-task.current { background: linear-gradient(120deg, #dceddf, rgba(241,251,243,.85)); border-color: #a1c6b1; }
+.button { border-radius: 1rem; min-height: 2.85rem; }
+.button.primary { background: linear-gradient(145deg, #32795e, #164c3e); border-color: rgba(255,255,255,.3); }
+.button.secondary { background: rgba(255,255,255,.63); box-shadow: 0 4px 14px rgba(35,68,52,.06), inset 0 1px 0 #fff; }
+.inline-select { border-radius: .8rem; min-height: 2.15rem; background-color: rgba(255,255,255,.8); }
+.task-table { border-collapse: separate; border-spacing: 0 .4rem; }
+.task-table td { background: rgba(255,255,255,.4); border-bottom: 0; }
+.task-table td:first-child { border-radius: 1rem 0 0 1rem; }
+.task-table td:last-child { border-radius: 0 1rem 1rem 0; }
+.task-table tbody tr:hover td { background: rgba(255,255,255,.78); }
+.now-title { padding-bottom: 1.25rem; }
+.next-action-card { margin: 0 1.5rem 1.25rem; border-radius: 1.5rem; box-shadow: inset 0 1px 0 #fff, 0 6px 20px rgba(38,98,65,.06); }
+.reason-box { border-radius: 1rem; background: rgba(255,245,220,.75); }
+.checklist { border-radius: 1.25rem; background: rgba(255,255,255,.35); }
+.checklist-head, .check-row.done, .focus-actions { background: rgba(255,255,255,.45); }
+.check-row:hover { background: rgba(234,246,235,.7); }
+.check-row:focus-within, .map-step-list label:focus-within { outline: 2px solid #438d70; outline-offset: -2px; }
+.time-strip { border-radius: 1.15rem; background: rgba(223,236,227,.6); }
+.task-dialog, .small-dialog, .notification-panel, .login-card {
+  border-radius: 2rem;
+  background: linear-gradient(130deg, rgba(251,255,251,.94), rgba(233,244,237,.86));
+  -webkit-backdrop-filter: blur(32px);
+  backdrop-filter: blur(32px);
+}
+.dialog-backdrop, .panel-backdrop { backdrop-filter: blur(8px); }
+.field input, .field textarea, .field select { background: rgba(255,255,255,.75); border-color: #b9ccc1; }
+.notification-item { border-radius: 1.2rem; }
+.brain-map-dialog { border-radius: 2rem; border-color: rgba(185,225,213,.35); box-shadow: 0 28px 90px rgba(6,36,29,.35), inset 0 1px 0 rgba(255,255,255,.2); }
+.map-node { backdrop-filter: blur(12px); box-shadow: inset 0 1px 0 rgba(255,255,255,.13), 0 8px 24px rgba(0,0,0,.12); }
+.summary-lead { background: linear-gradient(130deg, #31795e, #174a3f); }
+@media (max-width: 800px) {
+  .app-frame { padding: .65rem; }
+  .app-sidebar { top: 0; height: auto; border-radius: 1.5rem; }
+  .page { padding: 1rem 0 5rem; }
+  .page-header, .focus-top { padding: 1.1rem; }
+  .focus-side { grid-row: auto; }
+  .planner-section, .queue-section { padding: 1rem; }
+}
+@media (max-width: 560px) {
+  .metric-card { min-height: 5.5rem; }
+  .page-header h1 { font-size: 1.8rem; }
+  .next-action-card { margin-inline: 1rem; padding: 1.1rem; }
+  .now-card, .brain-card, .report-section { border-radius: 1.5rem; }
+  .notification-panel { width: calc(100% - 1rem); }
+}
+@supports not (backdrop-filter: blur(1px)) {
+  .metric-card, .planner-section, .queue-section, .now-card, .brain-card,
+  .next-card, .report-section, .report-summary, .page-header, .focus-top { background: #f1f7f1; }
+}
+@media print {
+  body { background: white; }
+  .page-header, .report-section, .report-summary { background: white; box-shadow: none; backdrop-filter: none; }
+}

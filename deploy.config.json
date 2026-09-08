@@ -1,0 +1,7 @@
+{
+  "target": "firebase-hosting",
+  "deployStrategy": "firebase-cli",
+  "firebaseProject": "ticket-pauta-gui",
+  "buildCommand": "npm run build",
+  "outputDirectory": "dist"
+}

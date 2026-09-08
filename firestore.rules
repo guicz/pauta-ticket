@@ -1,0 +1,21 @@
+rules_version = '2';
+
+service cloud.firestore {
+  match /databases/{database}/documents {
+    function isTeamMember() {
+      return request.auth != null
+        && request.auth.token.email in [
+          'patricia@dg5.com.br',
+          'guilherme@dg5.com.br'
+        ];
+    }
+
+    match /workspaces/pauta-fluxo {
+      allow read, write: if isTeamMember();
+    }
+
+    match /{document=**} {
+      allow read, write: if false;
+    }
+  }
+}
