@@ -1,7 +1,8 @@
 import type { AppState } from "../domain/models";
 import { seedState } from "../data/seed";
 
-const STORAGE_KEY = "pauta-fluxo-state-v2";
+// Previous demo remains recoverable under its original key.
+const STORAGE_KEY = "pauta-fluxo-state-v3";
 
 export function loadState(): AppState {
   try {
