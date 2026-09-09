@@ -2,13 +2,16 @@ import { useMemo, useState } from "react";
 import {
   ArrowRight,
   CalendarDays,
+  CalendarClock,
   Check,
   CheckCircle2,
   CircleAlert,
   Clock3,
   Inbox,
   Plus,
+  Save,
   Send,
+  X,
 } from "lucide-react";
 import type { AppState, Priority, Shift, Task } from "../domain/models";
 import { formatLongDate, formatMinutes, priorityLabel, statusLabel } from "../lib/format";
@@ -31,6 +34,7 @@ export function ManagerDashboard({ state, queueOnly, onCreateTask, onPublishAgen
   const [creating, setCreating] = useState(false);
   const [filter, setFilter] = useState("all");
   const [returning, setReturning] = useState<Task | null>(null);
+  const [scheduling, setScheduling] = useState<Task | null>(null);
   const [reason, setReason] = useState("");
   const visibleTasks = state.tasks.filter((task) => filter === "all" || (filter === "open" ? task.status !== "completed" : task.status === filter));
   const openTasks = state.tasks.filter((task) => task.status !== "completed");
@@ -101,21 +105,17 @@ export function ManagerDashboard({ state, queueOnly, onCreateTask, onPublishAgen
         </label>
         <div className="table-scroll">
           <table className="task-table">
-            <thead><tr><th>Demanda</th><th>Responsável</th><th>Estimativa</th><th>Prioridade</th><th>Período</th><th>Estado</th><th></th></tr></thead>
+            <thead><tr><th>Demanda</th><th>Responsável</th><th>Estimativa</th><th>Quando</th><th>Prioridade</th><th>Estado</th><th></th></tr></thead>
             <tbody>
               {visibleTasks.map((task) => (
                 <tr key={task.id} className={`demand-priority-${task.priority}`}>
                   <td><strong>{task.title}</strong><small>{task.client} · {task.project}</small>{task.evidence && <small>Prova: {task.evidence}</small>}{task.evidenceAttachment && <a className="evidence-thumb" href={task.evidenceAttachment.dataUrl} target="_blank" rel="noreferrer"><img src={task.evidenceAttachment.dataUrl} alt="Miniatura da prova" /><span>Ver print</span></a>}</td>
                   <td><span className={`avatar avatar-${task.assignee}`}>{task.assignee === "gui" ? "G" : "P"}</span>{task.assignee === "gui" ? "Gui" : "Pati"}</td>
-                  <td>{formatMinutes(task.executorEstimateMinutes ?? task.estimatedMinutes)}{task.executorEstimateMinutes && <small>ajustada</small>}<select className="inline-select" aria-label={`Repetição de ${task.title}`} value={task.recurrence ?? "none"} onChange={(event) => onUpdateTask(task.id, { recurrence: event.target.value as Task["recurrence"] })}><option value="none">Não repetir</option><option value="daily">Diária</option><option value="weekly">Semanal</option><option value="monthly">Mensal</option></select><div className="schedule-times"><input type="time" aria-label={`Início de ${task.title}`} value={task.scheduledStart ?? ""} onChange={(event) => onUpdateTask(task.id, { scheduledStart: event.target.value || undefined })} /><span>–</span><input type="time" aria-label={`Término de ${task.title}`} value={task.scheduledEnd ?? ""} min={task.scheduledStart} onChange={(event) => onUpdateTask(task.id, { scheduledEnd: event.target.value || undefined })} /></div>{task.scheduledDate && <small>Agendada: {task.scheduledDate.split("-").reverse().join("/")}</small>}</td>
+                  <td><strong>{formatMinutes(task.executorEstimateMinutes ?? task.estimatedMinutes)}</strong>{task.executorEstimateMinutes && <small>ajustada pelo Gui</small>}</td>
+                  <td className="planning-cell"><button className={`schedule-trigger ${task.scheduledStart || task.shift ? "has-schedule" : ""}`} onClick={() => setScheduling(task)} aria-label={`Editar horário de ${task.title}`}><CalendarClock size={18} /><span><strong>{scheduleTimeLabel(task)}</strong><small>{scheduleMetaLabel(task)}</small></span><span className="schedule-edit">Editar</span></button><select className="inline-select recurrence-select" aria-label={`Repetição de ${task.title}`} value={task.recurrence ?? "none"} onChange={(event) => onUpdateTask(task.id, { recurrence: event.target.value as Task["recurrence"] })}><option value="none">Não repetir</option><option value="daily">Diária</option><option value="weekly">Semanal</option><option value="monthly">Mensal</option></select></td>
                   <td>
                     <select aria-label={`Prioridade de ${task.title}`} value={task.priority} onChange={(event) => onUpdateTask(task.id, { priority: event.target.value as Priority })} className={`inline-select priority-${task.priority}`}>
                       <option value="urgent">Urgente</option><option value="high">Alta</option><option value="normal">Normal</option><option value="low">Baixa</option>
-                    </select>
-                  </td>
-                  <td>
-                    <select aria-label={`Período de ${task.title}`} value={task.shift ?? ""} onChange={(event) => onUpdateTask(task.id, { shift: (event.target.value || null) as Shift, scheduledDate: event.target.value ? today : undefined })} className="inline-select">
-                      <option value="">Fila</option><option value="morning">Manhã</option><option value="afternoon">Tarde</option>
                     </select>
                   </td>
                   <td><span className={`status status-${task.status}`}>{statusLabel(task.status)}</span></td>
@@ -129,9 +129,58 @@ export function ManagerDashboard({ state, queueOnly, onCreateTask, onPublishAgen
       </section>
 
       {creating && <CreateTaskDialog onClose={() => setCreating(false)} onCreate={onCreateTask} />}
+      {scheduling && <ScheduleDialog task={scheduling} onClose={() => setScheduling(null)} onSave={(changes) => { onUpdateTask(scheduling.id, changes); setScheduling(null); }} />}
       {returning && <div className="dialog-backdrop"><dialog open className="small-dialog" aria-labelledby="return-title"><header><h2 id="return-title">Devolver para ajustes</h2><button className="text-close" onClick={() => setReturning(null)}>Cancelar</button></header><form className="small-dialog-body" onSubmit={(event) => { event.preventDefault(); if (!reason.trim()) return; onReturnTask(returning.id, reason.trim()); setReturning(null); }}><p>{returning.title}</p><label className="field">O que precisa ser corrigido?<textarea autoFocus required value={reason} onChange={(event) => setReason(event.target.value)} rows={4} /></label><p>O progresso e a prova serão preservados. O ajuste entrará como uma nova etapa.</p><button className="button primary" disabled={!reason.trim()}>Devolver demanda</button></form></dialog></div>}
     </div>
   );
+}
+
+function scheduleTimeLabel(task: Task) {
+  if (task.scheduledStart) return `${task.scheduledStart}${task.scheduledEnd ? `–${task.scheduledEnd}` : ""}`;
+  if (task.shift === "morning") return "Manhã";
+  if (task.shift === "afternoon") return "Tarde";
+  return "Adicionar horário";
+}
+
+function scheduleMetaLabel(task: Task) {
+  if (task.scheduledDate) return task.scheduledDate.split("-").reverse().join("/");
+  return task.shift ? "Turno definido · clique para ajustar" : "Data e turno pendentes";
+}
+
+function ScheduleDialog({ task, onClose, onSave }: { task: Task; onClose: () => void; onSave: (changes: Partial<Task>) => void }) {
+  const [date, setDate] = useState(task.scheduledDate ?? today);
+  const [shift, setShift] = useState<Shift>(task.shift);
+  const [start, setStart] = useState(task.scheduledStart ?? "");
+  const [end, setEnd] = useState(task.scheduledEnd ?? "");
+
+  function applyPreset(nextShift: Exclude<Shift, null>, nextStart: string, nextEnd: string) {
+    setShift(nextShift);
+    setStart(nextStart);
+    setEnd(nextEnd);
+  }
+
+  function save() {
+    onSave({ scheduledDate: date || undefined, shift, scheduledStart: start || undefined, scheduledEnd: end || undefined });
+  }
+
+  function clear() {
+    onSave({ scheduledDate: undefined, shift: null, scheduledStart: undefined, scheduledEnd: undefined });
+  }
+
+  return <div className="dialog-backdrop" role="presentation" onMouseDown={(event) => event.target === event.currentTarget && onClose()}><dialog open className="schedule-dialog" aria-labelledby="schedule-title">
+    <header><div><span className="eyebrow">PLANEJAR DEMANDA</span><h2 id="schedule-title">Quando executar?</h2><p>{task.title}</p></div><button className="text-close" onClick={onClose} aria-label="Fechar"><X size={20} /></button></header>
+    <div className="schedule-dialog-body">
+      <div className="schedule-presets"><span>Atalhos de horário</span><div><button type="button" onClick={() => applyPreset("morning", "08:00", "09:30")}><CalendarClock size={16} /> Manhã · 08:00–09:30</button><button type="button" onClick={() => applyPreset("afternoon", "13:30", "15:00")}><CalendarClock size={16} /> Tarde · 13:30–15:00</button></div></div>
+      <div className="schedule-form-grid">
+        <label className="field"><span>Data</span><input type="date" value={date} onChange={(event) => setDate(event.target.value)} /></label>
+        <label className="field"><span>Turno</span><select value={shift ?? ""} onChange={(event) => setShift((event.target.value || null) as Shift)}><option value="">Sem turno</option><option value="morning">Manhã</option><option value="afternoon">Tarde</option></select></label>
+        <label className="field"><span>Começa às</span><input type="time" value={start} onChange={(event) => setStart(event.target.value)} /></label>
+        <label className="field"><span>Termina às</span><input type="time" value={end} min={start} onChange={(event) => setEnd(event.target.value)} /></label>
+      </div>
+      <p className="schedule-help">Use o horário exato quando a pauta já estiver definida. Se ainda não souber, deixe apenas o turno.</p>
+      <div className="schedule-dialog-actions"><button className="button secondary" onClick={clear}>Limpar horário</button><div><button className="button secondary" onClick={onClose}>Cancelar</button><button className="button primary" onClick={save}><Save size={17} /> Salvar horário</button></div></div>
+    </div>
+  </dialog></div>;
 }
 
 function Metric({ icon: Icon, label, value, tone }: { icon: typeof CalendarDays; label: string; value: number; tone: string }) {
