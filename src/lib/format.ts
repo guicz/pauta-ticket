@@ -40,7 +40,7 @@ export function priorityLabel(priority: string): string {
 export function statusLabel(status: string): string {
   return {
     inbox: "Entrada",
-    ready: "Pronta",
+    ready: "Liberada",
     active: "Agora",
     partial: "Em andamento",
     paused: "Pausada",

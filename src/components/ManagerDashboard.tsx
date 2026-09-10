@@ -23,6 +23,7 @@ interface ManagerDashboardProps {
   onCreateTask: (task: Omit<Task, "id" | "createdAt" | "updatedAt">) => void;
   onPublishAgenda: () => void;
   onApproveTask: (taskId: string) => void;
+  onFinalizeTask: (taskId: string) => void;
   onReturnTask: (taskId: string, reason: string) => void;
   onForwardTask: (taskId: string) => void;
   onUpdateTask: (taskId: string, changes: Partial<Task>) => void;
@@ -30,7 +31,7 @@ interface ManagerDashboardProps {
 
 const today = new Date().toISOString().slice(0, 10);
 
-export function ManagerDashboard({ state, queueOnly, onCreateTask, onPublishAgenda, onApproveTask, onReturnTask, onForwardTask, onUpdateTask }: ManagerDashboardProps) {
+export function ManagerDashboard({ state, queueOnly, onCreateTask, onPublishAgenda, onApproveTask, onFinalizeTask, onReturnTask, onForwardTask, onUpdateTask }: ManagerDashboardProps) {
   const [creating, setCreating] = useState(false);
   const [filter, setFilter] = useState("all");
   const [returning, setReturning] = useState<Task | null>(null);
@@ -119,7 +120,7 @@ export function ManagerDashboard({ state, queueOnly, onCreateTask, onPublishAgen
                     </select>
                   </td>
                   <td><span className={`status status-${task.status}`}>{statusLabel(task.status)}</span></td>
-                  <td>{task.status === "inbox" && <button className="button compact" onClick={() => onForwardTask(task.id)}>Encaminhar ao Gui</button>}{task.status === "in_review" && <button className="button compact" onClick={() => onApproveTask(task.id)}>Aprovar entrega</button>}{["in_review", "completed"].includes(task.status) && <button className="button secondary compact" onClick={() => { setReturning(task); setReason(""); }}>{task.status === "completed" ? "Reabrir demanda" : "Devolver para ajustes"}</button>}</td>
+                  <td>{task.status === "inbox" && <button className="button compact" onClick={() => onForwardTask(task.id)}>Encaminhar ao Gui</button>}{task.status === "in_review" && <button className="button compact" onClick={() => onApproveTask(task.id)}>Aprovar entrega</button>}{["ready", "active", "partial", "paused"].includes(task.status) && <button className="button primary compact" onClick={() => onFinalizeTask(task.id)}><CheckCircle2 size={15} /> Finalizar demanda</button>}{["in_review", "completed"].includes(task.status) && <button className="button secondary compact" onClick={() => { setReturning(task); setReason(""); }}>{task.status === "completed" ? "Reabrir demanda" : "Devolver para ajustes"}</button>}</td>
                 </tr>
               ))}
               {visibleTasks.length === 0 && <tr><td colSpan={7} className="empty-cell">Nenhuma demanda neste filtro.</td></tr>}

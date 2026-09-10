@@ -309,6 +309,24 @@ export function App() {
     }));
   }
 
+  function finalizeTask(taskId: string) {
+    const now = new Date().toISOString();
+    setState((current) => {
+      const target = current.tasks.find((task) => task.id === taskId);
+      if (!target || !["ready", "active", "partial", "paused"].includes(target.status)) return current;
+      const next = nextOccurrence(target, current.tasks, new Date(now));
+      const updated = current.tasks.map((task) => task.id === taskId ? { ...task, status: "completed" as const, completedAt: now, updatedAt: now } : task);
+      return {
+        ...current,
+        tasks: next ? [...updated, next] : updated,
+        events: [appendEvent({ actor: "pati", kind: "task_completed", taskId, description: "Demanda finalizada pela Pati." }), ...current.events],
+        notifications: target.assignee === "gui"
+          ? [appendNotification({ recipient: "gui", level: "quiet", title: "Demanda finalizada", message: `A demanda “${target.title}” foi encerrada pela Pati.` }), ...current.notifications]
+          : current.notifications,
+      };
+    });
+  }
+
   function returnTask(taskId: string, reason: string) {
     const now = new Date().toISOString();
     setState((current) => {
@@ -370,6 +388,7 @@ export function App() {
             onCreateTask={createTask}
             onPublishAgenda={publishAgenda}
             onApproveTask={approveTask}
+            onFinalizeTask={finalizeTask}
             onReturnTask={returnTask}
             onForwardTask={forwardTask}
             onUpdateTask={updateTask}
