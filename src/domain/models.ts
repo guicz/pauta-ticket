@@ -41,6 +41,8 @@ export interface Task {
   doneCondition: string;
   assignee: Person;
   requester: Person;
+  requesterName?: string;
+  requesterEmail?: string;
   priority: Priority;
   status: TaskStatus;
   estimatedMinutes: number;
@@ -69,6 +71,7 @@ export interface ActivityEvent {
   actor: Person;
   kind:
     | "task_created"
+    | "task_reassigned"
     | "agenda_published"
     | "estimate_changed"
     | "priority_changed"
@@ -85,6 +88,7 @@ export interface ActivityEvent {
 
 export interface AppNotification {
   id: string;
+  taskId?: string;
   recipient: Person;
   level: "quiet" | "normal" | "urgent";
   title: string;

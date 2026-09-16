@@ -15,7 +15,7 @@ export function nextOccurrence(task: Task, tasks: Task[], now = new Date()): Tas
     id: `${task.id}-next`, recurrenceParentId: task.id, recurrence: task.recurrence,
     title: task.title, client: task.client, project: task.project,
     expectedResult: task.expectedResult, doneCondition: task.doneCondition,
-    assignee: task.assignee, requester: task.requester, priority: task.priority,
+    assignee: task.assignee, requester: task.requester, requesterName: task.requesterName, requesterEmail: task.requesterEmail, priority: task.priority,
     estimatedMinutes: task.estimatedMinutes, status: "ready", shift: task.shift,
     scheduledDate, steps: task.steps.map((step) => ({ ...step, done: false })),
     createdAt: now.toISOString(), updatedAt: now.toISOString(),

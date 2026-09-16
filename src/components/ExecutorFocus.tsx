@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState, type ClipboardEvent } from "react";
 import {
   AlertCircle,
   ArrowRight,
@@ -32,6 +32,7 @@ import {
   X,
 } from "lucide-react";
 import type { AppNotification, AppState, EvidenceAttachment, Task } from "../domain/models";
+import { guiWork } from "../domain/guiWork";
 import { formatLongDate, formatMinutes, priorityLabel } from "../lib/format";
 
 interface ExecutorFocusProps {
@@ -56,14 +57,7 @@ export function ExecutorFocus({ state, notifications, onStartTask, onToggleStep,
   const [memoryDraft, setMemoryDraft] = useState("");
   const [memorySaved, setMemorySaved] = useState(false);
   const unread = notifications.filter((notification) => !notification.read).length;
-  const priorityOrder = { urgent: 0, high: 1, normal: 2, low: 3 } as const;
-  const tasks = state.tasks
-    .filter((task) => task.assignee === "gui" && !["completed", "in_review"].includes(task.status))
-    .sort((left, right) => priorityOrder[left.priority] - priorityOrder[right.priority]);
-  const date = new Date();
-  const today = `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, "0")}-${String(date.getDate()).padStart(2, "0")}`;
-  const active = tasks.find((task) => task.status === "active") ?? tasks.find((task) => task.scheduledDate && task.scheduledDate <= today && ["ready", "partial", "paused"].includes(task.status));
-  const next = tasks.find((task) => task.id !== active?.id && ["ready", "partial", "paused"].includes(task.status));
+  const { current: active, next } = guiWork(state.tasks);
 
   if (!active) {
     return (
@@ -80,6 +74,8 @@ export function ExecutorFocus({ state, notifications, onStartTask, onToggleStep,
   const nextStep = active.steps.find((step) => !step.done);
   const lastCompleted = [...active.steps].reverse().find((step) => step.done);
   const activeTaskId = active.id;
+  const priorityRank = { urgent: 0, high: 1, normal: 2, low: 3 };
+  const highlighted = next && priorityRank[next.priority] < priorityRank[active.priority] ? next : active;
   const returnPoint = active.returnPoint ?? (nextStep
     ? `${lastCompleted ? `Você concluiu “${lastCompleted.label}”. ` : ""}Retome em “${nextStep.label}”.`
     : "Etapas concluídas. Anexe a prova e envie para validação.");
@@ -96,6 +92,14 @@ export function ExecutorFocus({ state, notifications, onStartTask, onToggleStep,
   return (
     <div className="page focus-page">
       <FocusHeader unread={unread} onOpenNotifications={onOpenNotifications} />
+
+      <section className={`focus-priority-center demand-priority-${highlighted.priority}`} aria-label="Demanda prioritária">
+        <span className="eyebrow">{highlighted.id === active.id ? "SEU FOCO PRIORITÁRIO" : "MAIOR PRIORIDADE NA FILA"}</span>
+        <span className={`priority-badge priority-${highlighted.priority}`}>Prioridade {priorityLabel(highlighted.priority)}</span>
+        <h2>{highlighted.title}</h2>
+        <p>{highlighted.client} · {formatMinutes(highlighted.executorEstimateMinutes ?? highlighted.estimatedMinutes)}{highlighted.scheduledDate ? ` · ${highlighted.scheduledDate.split("-").reverse().join("/")}` : ""}</p>
+        {highlighted.id !== active.id && <span className="priority-context">{active.status === "active" ? "Em andamento" : "Disponível agora"}: {active.title}</span>}
+      </section>
 
       <div className="focus-layout">
         <section className={`now-card demand-priority-${active.priority}`}>
@@ -213,11 +217,11 @@ export function ExecutorFocus({ state, notifications, onStartTask, onToggleStep,
               </div>
             )}
           </section>
-          <div className={`next-card ${next ? `demand-priority-${next.priority}` : ""}`} data-tooltip={next ? "A ordem desta tarefa pode ser revisada pela Pati." : "A fila está vazia depois da tarefa atual."}>
+          {highlighted.id === active.id && <div className={`next-card ${next ? `demand-priority-${next.priority}` : ""}`} data-tooltip={next ? "A ordem desta tarefa pode ser revisada pela Pati." : "A fila está vazia depois da tarefa atual."}>
             <span className="eyebrow">{next && ["urgent", "high"].includes(next.priority) ? "PRÓXIMA PRIORIDADE" : "DEPOIS"}</span>
             {next && <span className="priority-badge">Prioridade {priorityLabel(next.priority)}</span>}
             {next ? <><h2>{next.title}</h2><p>{next.client} · {formatMinutes(next.executorEstimateMinutes ?? next.estimatedMinutes)}</p></> : <p>Nenhuma tarefa na sequência.</p>}
-          </div>
+          </div>}
           <div className="focus-rule" data-tooltip="Novas demandas entram na fila, mas nunca substituem a tarefa que você iniciou."><AlertCircle size={17} /><span className="sr-only">Novas demandas não substituem a tarefa atual.</span></div>
         </aside>
       </div>
@@ -448,6 +452,7 @@ function TextDialog({ title, label, placeholder, action, onClose, onSubmit }: { 
 function EvidenceDialog({ onClose, onSubmit }: { onClose: () => void; onSubmit: (value: string, attachment?: EvidenceAttachment) => void }) {
   const [value, setValue] = useState("");
   const [attachment, setAttachment] = useState<EvidenceAttachment>();
+  const imageRequest = useRef(0);
   const [processing, setProcessing] = useState(false);
   const [error, setError] = useState("");
 
@@ -458,26 +463,52 @@ function EvidenceDialog({ onClose, onSubmit }: { onClose: () => void; onSubmit: 
       return;
     }
     setError("");
+    const request = ++imageRequest.current;
     setProcessing(true);
     try {
-      setAttachment(await compressEvidenceImage(file));
+      const prepared = await compressEvidenceImage(file);
+      if (request === imageRequest.current) setAttachment(prepared);
     } catch {
-      setError("Não foi possível preparar esse print. Tente outra imagem.");
+      if (request === imageRequest.current) setError("Não foi possível preparar esse print. Tente outra imagem.");
     } finally {
-      setProcessing(false);
+      if (request === imageRequest.current) setProcessing(false);
     }
+  }
+
+  function handlePaste(event: ClipboardEvent<HTMLTextAreaElement>) {
+    const images = Array.from(event.clipboardData.items).filter(item => item.kind === "file" && item.type.startsWith("image/"));
+    if (!images.length) return;
+    event.preventDefault();
+    if (images.length > 1) {
+      setError("Cole um print por vez. Cada entrega permite um print; colar outro substitui o anterior.");
+      return;
+    }
+    const file = images[0].getAsFile();
+    if (!file) {
+      setError("Não foi possível ler a imagem copiada. Copie o print novamente.");
+      return;
+    }
+    const text = event.clipboardData.getData("text/plain");
+    if (text) {
+      const { selectionStart, selectionEnd } = event.currentTarget;
+      setValue(current => current.slice(0, selectionStart) + text + current.slice(selectionEnd));
+    }
+    void handleFile(file);
   }
 
   const canSubmit = Boolean(value.trim() || attachment) && !processing;
   return <TextModal title="Envie a prova da entrega" onClose={onClose}>
-    <label className="field"><span>Descrição ou link da prova <small>(opcional se houver print)</small></span><textarea autoFocus value={value} onChange={(event) => setValue(event.target.value)} rows={3} placeholder="Ex.: campanhas revisadas e print anexado abaixo" /></label>
+    <div className="evidence-composer">
+    <label className="field"><span>Justificativa ou prova da entrega <small title="Aceita texto, links e um print. Colar outro print substitui o anterior.">ⓘ</small></span><textarea autoFocus value={value} onChange={(event) => setValue(event.target.value)} onPaste={handlePaste} rows={4} placeholder="Escreva aqui ou cole um print com Ctrl+V (⌘V no Mac)" /></label>
+    {processing && <p role="status">Preparando o print…</p>}
+    {attachment && <div className="evidence-preview"><img src={attachment.dataUrl} alt="Prévia do print de prova" /><div><strong>{attachment.name}</strong><small role="status">Print pronto para enviar.</small></div><button type="button" onClick={() => { imageRequest.current++; setAttachment(undefined); setProcessing(false); setError(""); }} aria-label="Remover print"><Trash2 size={16} /></button></div>}
+    </div>
     <label className="evidence-upload">
       <ImagePlus size={21} />
       <span><strong>{processing ? "Preparando o print…" : attachment ? "Trocar print" : "Anexar print de prova"}</strong><small>PNG, JPG ou WebP. A imagem será reduzida automaticamente.</small></span>
       <input type="file" accept="image/png,image/jpeg,image/webp" onChange={(event) => { void handleFile(event.target.files?.[0]); event.currentTarget.value = ""; }} />
     </label>
-    {attachment && <div className="evidence-preview"><img src={attachment.dataUrl} alt="Prévia do print de prova" /><div><strong>{attachment.name}</strong><small>Print pronto para enviar.</small></div><button type="button" onClick={() => setAttachment(undefined)} aria-label="Remover print"><Trash2 size={16} /></button></div>}
-    {error && <p className="form-error">{error}</p>}
+    {error && <p className="form-error" role="alert">{error}</p>}
     <p className="dialog-note">A prova ajuda a Pati a validar o que foi entregue sem interromper seu fluxo.</p>
     <button className="button primary full" disabled={!canSubmit} onClick={() => onSubmit(value.trim(), attachment)}>{processing ? "Preparando…" : "Enviar para validação"}</button>
   </TextModal>;

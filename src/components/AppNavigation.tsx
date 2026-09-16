@@ -10,7 +10,7 @@ import {
 } from "lucide-react";
 import type { AppNotification, Person } from "../domain/models";
 
-export type AppView = "overview" | "queue" | "focus" | "report" | "request";
+export type AppView = "overview" | "queue" | "focus" | "report" | "daily" | "request";
 
 interface AppNavigationProps {
   person: Person;
@@ -40,6 +40,7 @@ export function AppNavigation({
     { id: "overview", label: "Visão geral", icon: LayoutDashboard },
     { id: "queue", label: "Fila de demandas", icon: ListTodo },
     { id: "report", label: "Relatório semanal", icon: BarChart3 },
+    { id: "daily", label: "Relatório diário", icon: ClipboardList },
   ];
   const guiItems: Array<{ id: AppView; label: string; icon: typeof Focus }> = [
     { id: "focus", label: "Meu agora", icon: Focus },

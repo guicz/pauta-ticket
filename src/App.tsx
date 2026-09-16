@@ -4,7 +4,10 @@ import { AppNavigation, type AppView } from "./components/AppNavigation";
 import { ManagerDashboard } from "./components/ManagerDashboard";
 import { ExecutorFocus } from "./components/ExecutorFocus";
 import { WeeklyReport } from "./components/WeeklyReport";
+import { DailyReport } from "./components/DailyReport";
 import { NotificationPanel } from "./components/NotificationPanel";
+import { NotificationTaskDialog } from "./components/NotificationTaskDialog";
+import { notificationTaskId } from "./domain/notificationTarget";
 import { LoginScreen } from "./components/LoginScreen";
 import { AttendanceRequest } from "./components/AttendanceRequest";
 import type { ActivityEvent, AppNotification, AppState, EvidenceAttachment, Person, Task } from "./domain/models";
@@ -12,6 +15,8 @@ import { subscribeToWorkspace, saveWorkspace, submitDemandRequest, subscribeToDe
 import { auth, firebaseConfigured, personFromEmail } from "./lib/firebase";
 import { loadState, resetState, saveState } from "./lib/storage";
 import { nextOccurrence } from "./domain/recurrence";
+import { reassignTask } from "./domain/guiWork";
+import { useTaskNotifications } from "./lib/useTaskNotifications";
 
 const id = (prefix: string) => `${prefix}-${Date.now()}-${Math.random().toString(16).slice(2)}`;
 
@@ -20,6 +25,7 @@ export function App() {
   const [demoPerson, setDemoPerson] = useState<Person>("pati");
   const [view, setView] = useState<AppView>("overview");
   const [notificationsOpen, setNotificationsOpen] = useState(false);
+  const [notificationDemand, setNotificationDemand] = useState<string | null>(() => new URLSearchParams(window.location.search).get("task"));
   const [user, setUser] = useState<User | null>(null);
   const [authReady, setAuthReady] = useState(!firebaseConfigured);
   const [demoMode, setDemoMode] = useState(!firebaseConfigured);
@@ -29,6 +35,19 @@ export function App() {
   const demandRequestsRef = useRef<Task[]>([]);
 
   const person = demoMode ? demoPerson : personFromEmail(user?.email ?? null);
+  const { reminders, currentReminder, markRemindersRead } = useTaskNotifications(state, person, demoMode ? `demo:${person}` : user?.uid ?? "signed-out", demoMode || Boolean(user && cloudReady && person !== "atendimento"));
+
+  useEffect(() => {
+    if (new URLSearchParams(window.location.search).get("notifications") === "1") setNotificationsOpen(true);
+    if (!("serviceWorker" in navigator)) return;
+    const receive = (event: MessageEvent) => {
+      if (event.data?.type !== "open-notifications") return;
+      if (typeof event.data.taskId === "string") { setNotificationDemand(event.data.taskId); setNotificationsOpen(false); }
+      else setNotificationsOpen(true);
+    };
+    navigator.serviceWorker.addEventListener("message", receive);
+    return () => navigator.serviceWorker.removeEventListener("message", receive);
+  }, []);
 
   useEffect(() => {
     if (!auth) return;
@@ -106,8 +125,8 @@ export function App() {
   }, [person, view]);
 
   const notifications = useMemo(
-    () => state.notifications.filter((notification) => notification.recipient === person),
-    [person, state.notifications],
+    () => [...reminders, ...state.notifications].filter((notification) => notification.recipient === person),
+    [person, state.notifications, reminders],
   );
 
   function appendEvent(event: Omit<ActivityEvent, "id" | "createdAt">): ActivityEvent {
@@ -122,7 +141,8 @@ export function App() {
 
   function createTask(task: Omit<Task, "id" | "createdAt" | "updatedAt">) {
     const now = new Date().toISOString();
-    const nextTask: Task = { ...task, id: id("task"), assignee: person === "atendimento" ? "pati" : task.assignee, requester: person === "atendimento" ? "atendimento" : task.requester, status: person === "atendimento" ? "inbox" : task.status, createdAt: now, updatedAt: now };
+    const fallbackRequesterName = person === "gui" ? "Guilherme" : person === "atendimento" ? "Atendimento" : "Pati";
+    const nextTask: Task = { ...task, id: id("task"), requesterName: task.requesterName ?? user?.displayName ?? fallbackRequesterName, requesterEmail: task.requesterEmail ?? user?.email ?? undefined, assignee: person === "atendimento" ? "pati" : task.assignee, requester: person === "atendimento" ? "atendimento" : task.requester, status: person === "atendimento" ? "inbox" : task.status, createdAt: now, updatedAt: now };
     if (person === "atendimento" && !demoMode) void submitDemandRequest(nextTask);
     setState((current) => ({
       ...current,
@@ -133,6 +153,7 @@ export function App() {
       ],
       notifications: [
         appendNotification({
+          taskId: nextTask.id,
           recipient: nextTask.assignee,
           level: "quiet",
           title: nextTask.requester === "atendimento" ? "Nova solicitação de atendimento" : "Nova demanda registrada",
@@ -163,7 +184,23 @@ export function App() {
         ...current,
         tasks: current.tasks.map((task) => task.id === taskId ? forwarded : task),
         events: [appendEvent({ actor: "pati", kind: "task_created", taskId, description: `Solicitação encaminhada ao Gui: ${target.title}.` }), ...current.events],
-        notifications: [appendNotification({ recipient: "gui", level: "normal", title: "Nova tarefa na sua fila", message: `${target.title} foi organizada pela Pati e está pronta para entrar na pauta.` }), ...current.notifications],
+        notifications: [appendNotification({ taskId, recipient: "gui", level: "normal", title: "Nova tarefa na sua fila", message: `${target.title} foi organizada pela Pati e está pronta para entrar na pauta.` }), ...current.notifications],
+      };
+    });
+  }
+
+  function changeAssignee(taskId: string, assignee: "pati" | "gui") {
+    if (person !== "pati") return;
+    setState(current => {
+      const target = current.tasks.find(task => task.id === taskId);
+      if (!target) return current;
+      const updated = reassignTask(target, assignee, new Date().toISOString());
+      if (updated === target) return current;
+      return {
+        ...current,
+        tasks: current.tasks.map(task => task.id === taskId ? updated : task),
+        events: [appendEvent({ actor: "pati", kind: "task_reassigned", taskId, description: `Responsável alterado de ${target.assignee === "gui" ? "Gui" : "Pati"} para ${assignee === "gui" ? "Gui" : "Pati"}. Progresso preservado.` }), ...current.events],
+        notifications: [appendNotification({ taskId, recipient: "gui", level: "normal", title: "Responsável atualizado", message: assignee === "pati" ? `Pati assumiu a demanda “${target.title}”.` : `A demanda “${target.title}” entrou na sua fila.` }), ...current.notifications],
       };
     });
   }
@@ -195,7 +232,7 @@ export function App() {
         ...current.events,
       ],
       notifications: [
-        appendNotification({ recipient: "pati", level: "quiet", title: "Estimativa ajustada", message: `Gui informou uma nova previsão: ${minutes} minutos.` }),
+        appendNotification({ taskId, recipient: "pati", level: "quiet", title: "Estimativa ajustada", message: `Gui informou uma nova previsão: ${minutes} minutos.` }),
         ...current.notifications,
       ],
     }));
@@ -281,7 +318,7 @@ export function App() {
       ...current,
       tasks: current.tasks.map((task) => task.id === taskId ? { ...task, status: "blocked", blocker: reason, updatedAt: new Date().toISOString() } : task),
       events: [appendEvent({ actor: "gui", kind: "task_blocked", taskId, description: `Tarefa bloqueada: ${reason}.` }), ...current.events],
-      notifications: [appendNotification({ recipient: "pati", level: "normal", title: "Tarefa bloqueada", message: reason }), ...current.notifications],
+      notifications: [appendNotification({ taskId, recipient: "pati", level: "normal", title: "Tarefa bloqueada", message: reason }), ...current.notifications],
     }));
   }
 
@@ -290,7 +327,7 @@ export function App() {
       ...current,
       tasks: current.tasks.map((task) => task.id === taskId ? { ...task, status: "in_review", evidence, ...(evidenceAttachment ? { evidenceAttachment } : {}), updatedAt: new Date().toISOString() } : task),
       events: [appendEvent({ actor: "gui", kind: "sent_to_review", taskId, description: "Tarefa enviada para validação." }), ...current.events],
-      notifications: [appendNotification({ recipient: "pati", level: "normal", title: "Entrega para validar", message: "Gui enviou uma tarefa com evidência." }), ...current.notifications],
+      notifications: [appendNotification({ taskId, recipient: "pati", level: "normal", title: "Entrega para validar", message: "Gui enviou uma tarefa com evidência." }), ...current.notifications],
     }));
   }
 
@@ -305,7 +342,7 @@ export function App() {
         return next ? [...updated, next] : updated;
       })(),
       events: [appendEvent({ actor: "pati", kind: "task_completed", taskId, description: "Entrega conferida e concluída." }), ...current.events],
-      notifications: [appendNotification({ recipient: "gui", level: "quiet", title: "Entrega aprovada", message: "A tarefa foi conferida e concluída." }), ...current.notifications],
+      notifications: [appendNotification({ taskId, recipient: "gui", level: "quiet", title: "Entrega aprovada", message: "A tarefa foi conferida e concluída." }), ...current.notifications],
     }));
   }
 
@@ -321,7 +358,7 @@ export function App() {
         tasks: next ? [...updated, next] : updated,
         events: [appendEvent({ actor: "pati", kind: "task_completed", taskId, description: "Demanda finalizada pela Pati." }), ...current.events],
         notifications: target.assignee === "gui"
-          ? [appendNotification({ recipient: "gui", level: "quiet", title: "Demanda finalizada", message: `A demanda “${target.title}” foi encerrada pela Pati.` }), ...current.notifications]
+          ? [appendNotification({ taskId, recipient: "gui", level: "quiet", title: "Demanda finalizada", message: `A demanda “${target.title}” foi encerrada pela Pati.` }), ...current.notifications]
           : current.notifications,
       };
     });
@@ -340,12 +377,13 @@ export function App() {
           return { ...rest, status: "ready" as const, scheduledDate: task.scheduledDate || now.slice(0, 10), returnPoint: `Ajuste solicitado pela Pati: ${reason}`, updatedAt: now, steps: [...task.steps, { id: id("adjustment"), label: `Ajustar: ${reason}`, done: false }] };
         }),
         events: [appendEvent({ actor: "pati", kind: "task_interrupted", taskId, description: `Demanda devolvida para ajustes: ${reason}` }), ...current.events],
-        notifications: [appendNotification({ recipient: target.assignee, level: "normal", title: "Demanda devolvida para ajustes", message: `${target.title}: ${reason}` }), ...current.notifications],
+        notifications: [appendNotification({ taskId, recipient: target.assignee, level: "normal", title: "Demanda devolvida para ajustes", message: `${target.title}: ${reason}` }), ...current.notifications],
       };
     });
   }
 
   function markNotificationsRead() {
+    markRemindersRead();
     setState((current) => ({
       ...current,
       notifications: current.notifications.map((notification) => notification.recipient === person ? { ...notification, read: true } : notification),
@@ -381,7 +419,8 @@ export function App() {
         onSignOut={() => auth && void signOut(auth)}
       />
       <main className="app-main">
-        {person === "pati" && view !== "report" && (
+        {currentReminder && <div role="status"><button className="task-time-alert" onClick={() => { const taskId = notificationTaskId(currentReminder); if (taskId) setNotificationDemand(taskId); else setNotificationsOpen(true); }}>{currentReminder.message} <strong>Abrir demanda</strong></button></div>}
+        {person === "pati" && view !== "report" && view !== "daily" && (
           <ManagerDashboard
             state={state}
             queueOnly={view === "queue"}
@@ -392,9 +431,11 @@ export function App() {
             onReturnTask={returnTask}
             onForwardTask={forwardTask}
             onUpdateTask={updateTask}
+            onChangeAssignee={changeAssignee}
           />
         )}
         {person === "pati" && view === "report" && <WeeklyReport state={state} />}
+        {person === "pati" && view === "daily" && <DailyReport state={state} />}
         {person === "atendimento" && <AttendanceRequest onCreate={createTask} />}
         {person === "gui" && (
           <ExecutorFocus
@@ -418,8 +459,11 @@ export function App() {
           notifications={notifications}
           onClose={() => setNotificationsOpen(false)}
           onMarkAllRead={markNotificationsRead}
+          onOpenTask={taskId => { setNotificationDemand(taskId); setNotificationsOpen(false); }}
         />
       )}
+
+      {notificationDemand && <NotificationTaskDialog task={(demoMode || cloudReady) ? state.tasks.find(task => task.id === notificationDemand && (person === "pati" || (person === "gui" && task.assignee === "gui"))) : undefined} loading={!demoMode && !cloudReady && person !== "atendimento"} onClose={() => { setNotificationDemand(null); const url = new URL(window.location.href); url.searchParams.delete("task"); window.history.replaceState(null, "", url); }} />}
 
       {demoMode && (
         <div className="demo-controls">
