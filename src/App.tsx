@@ -341,7 +341,7 @@ export function App() {
         const updated = current.tasks.map((task) => task.id === taskId ? { ...task, status: "completed" as const, completedAt: now, updatedAt: now } : task);
         return next ? [...updated, next] : updated;
       })(),
-      events: [appendEvent({ actor: "pati", kind: "task_completed", taskId, description: "Entrega conferida e concluída." }), ...current.events],
+      events: [appendEvent({ actor: "pati", assignee: current.tasks.find(task => task.id === taskId)?.assignee, kind: "task_completed", taskId, description: "Entrega conferida e concluída." }), ...current.events],
       notifications: [appendNotification({ taskId, recipient: "gui", level: "quiet", title: "Entrega aprovada", message: "A tarefa foi conferida e concluída." }), ...current.notifications],
     }));
   }
@@ -356,7 +356,7 @@ export function App() {
       return {
         ...current,
         tasks: next ? [...updated, next] : updated,
-        events: [appendEvent({ actor: "pati", kind: "task_completed", taskId, description: "Demanda finalizada pela Pati." }), ...current.events],
+        events: [appendEvent({ actor: "pati", assignee: target.assignee, kind: "task_completed", taskId, description: "Demanda finalizada pela Pati." }), ...current.events],
         notifications: target.assignee === "gui"
           ? [appendNotification({ taskId, recipient: "gui", level: "quiet", title: "Demanda finalizada", message: `A demanda “${target.title}” foi encerrada pela Pati.` }), ...current.notifications]
           : current.notifications,

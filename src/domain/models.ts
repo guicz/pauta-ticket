@@ -66,6 +66,7 @@ export interface Task {
 }
 
 export interface ActivityEvent {
+  assignee?: Person;
   id: string;
   taskId?: string;
   actor: Person;
