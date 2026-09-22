@@ -5,8 +5,8 @@ foreach ($size in @(192, 512)) {
   $bitmap = [System.Drawing.Bitmap]::new($size, $size)
   $graphics = [System.Drawing.Graphics]::FromImage($bitmap)
   $graphics.SmoothingMode = [System.Drawing.Drawing2D.SmoothingMode]::AntiAlias
-  $graphics.Clear([System.Drawing.ColorTranslator]::FromHtml('#e0ef26'))
-  $pen = [System.Drawing.Pen]::new([System.Drawing.ColorTranslator]::FromHtml('#192838'), $size * 0.035)
+  $graphics.Clear([System.Drawing.ColorTranslator]::FromHtml('#820ad1'))
+  $pen = [System.Drawing.Pen]::new([System.Drawing.ColorTranslator]::FromHtml('#ffffff'), $size * 0.035)
   $graphics.DrawRectangle($pen, $size * 0.29, $size * 0.25, $size * 0.42, $size * 0.52)
   $graphics.DrawLine($pen, $size * 0.38, $size * 0.2, $size * 0.62, $size * 0.2)
   $graphics.DrawLine($pen, $size * 0.38, $size * 0.43, $size * 0.62, $size * 0.43)

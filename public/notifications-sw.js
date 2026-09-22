@@ -1,4 +1,4 @@
-const CACHE = "pauta-shell-v2";
+const CACHE = "pauta-shell-v3";
 const STATIC = ["/offline.html", "/manifest.webmanifest", "/icons/pauta-192.png", "/icons/pauta-512.png"];
 
 function accountStore(mode, operation) {
