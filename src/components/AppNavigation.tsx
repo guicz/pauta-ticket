@@ -6,6 +6,7 @@ import {
   LayoutDashboard,
   ListTodo,
   LogOut,
+  Moon,
   UserRound,
 } from "lucide-react";
 import type { AppNotification, Person } from "../domain/models";
@@ -22,6 +23,8 @@ interface AppNavigationProps {
   allowPersonSwitch?: boolean;
   syncLabel?: string;
   onSignOut?: () => void;
+  theme?: "default" | "dark-premium";
+  onToggleTheme?: () => void;
 }
 
 export function AppNavigation({
@@ -34,6 +37,8 @@ export function AppNavigation({
   allowPersonSwitch = true,
   syncLabel,
   onSignOut,
+  theme = "default",
+  onToggleTheme,
 }: AppNavigationProps) {
   const unread = notifications.filter((notification) => !notification.read).length;
   const managerItems: Array<{ id: AppView; label: string; icon: typeof LayoutDashboard }> = [
@@ -75,6 +80,17 @@ export function AppNavigation({
       </nav>
 
       <div className="sidebar-footer">
+        {person === "gui" && onToggleTheme && (
+          <button
+            className="theme-toggle"
+            type="button"
+            aria-pressed={theme === "dark-premium"}
+            onClick={onToggleTheme}
+          >
+            <Moon size={17} aria-hidden="true" />
+            <span>{theme === "dark-premium" ? "Tema Dark & Premium ativo" : "Ativar tema Dark & Premium"}</span>
+          </button>
+        )}
         <button className="notification-shortcut" onClick={onOpenNotifications}>
           <Bell size={18} aria-hidden="true" />
           <span>Notificações</span>

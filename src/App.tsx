@@ -19,6 +19,8 @@ import { reassignTask } from "./domain/guiWork";
 import { useTaskNotifications } from "./lib/useTaskNotifications";
 
 const id = (prefix: string) => `${prefix}-${Date.now()}-${Math.random().toString(16).slice(2)}`;
+type GuiTheme = "default" | "dark-premium";
+const GUI_THEME_STORAGE_KEY = "pauta-gui-theme";
 
 export function App() {
   const [state, setState] = useState<AppState>(() => loadState());
@@ -31,11 +33,31 @@ export function App() {
   const [demoMode, setDemoMode] = useState(!firebaseConfigured);
   const [cloudReady, setCloudReady] = useState(false);
   const [syncLabel, setSyncLabel] = useState("Conectando…");
+  const [guiTheme, setGuiTheme] = useState<GuiTheme>(() => {
+    try {
+      return window.localStorage.getItem(GUI_THEME_STORAGE_KEY) === "dark-premium" ? "dark-premium" : "default";
+    } catch {
+      return "default";
+    }
+  });
   const lastCloudState = useRef("");
   const demandRequestsRef = useRef<Task[]>([]);
 
   const person = demoMode ? demoPerson : personFromEmail(user?.email ?? null);
   const { reminders, currentReminder, markRemindersRead } = useTaskNotifications(state, person, demoMode ? `demo:${person}` : user?.uid ?? "signed-out", demoMode || Boolean(user && cloudReady && person !== "atendimento"));
+
+  useEffect(() => {
+    const activeTheme = person === "gui" ? guiTheme : "default";
+    document.documentElement.dataset.uiTheme = activeTheme;
+    try {
+      window.localStorage.setItem(GUI_THEME_STORAGE_KEY, guiTheme);
+    } catch {
+      // A blocked storage only means the visual preference is session-local.
+    }
+    return () => {
+      delete document.documentElement.dataset.uiTheme;
+    };
+  }, [guiTheme, person]);
 
   useEffect(() => {
     if (new URLSearchParams(window.location.search).get("notifications") === "1") setNotificationsOpen(true);
@@ -406,7 +428,7 @@ export function App() {
   }
 
   return (
-    <div className="app-frame">
+    <div className="app-frame" data-ui-theme={person === "gui" ? guiTheme : "default"}>
       <AppNavigation
         person={person}
         view={view}
@@ -417,6 +439,8 @@ export function App() {
         allowPersonSwitch={demoMode}
         syncLabel={syncLabel}
         onSignOut={() => auth && void signOut(auth)}
+        theme={guiTheme}
+        onToggleTheme={() => setGuiTheme(current => current === "dark-premium" ? "default" : "dark-premium")}
       />
       <main className="app-main">
         {currentReminder && <div role="status"><button className="task-time-alert" onClick={() => { const taskId = notificationTaskId(currentReminder); if (taskId) setNotificationDemand(taskId); else setNotificationsOpen(true); }}>{currentReminder.message} <strong>Abrir demanda</strong></button></div>}
