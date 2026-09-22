@@ -1,14 +1,16 @@
 {
   "name": "pauta-fluxo",
   "private": true,
-  "version": "0.1.5",
+  "version": "0.2.0",
   "type": "module",
   "scripts": {
     "dev": "vite",
     "build": "tsc -b && vite build",
     "deploy": "npm run build && firebase deploy --only hosting",
-    "test": "vitest run",
-    "test:watch": "vitest"
+    "test": "vitest run --exclude functions/**",
+    "test:watch": "vitest --exclude functions/**",
+    "test:services": "npm test --prefix functions",
+    "deploy:services": "npm run build && firebase deploy --config firebase.services.json --only functions,firestore,hosting"
   },
   "dependencies": {
     "@vitejs/plugin-react": "latest",

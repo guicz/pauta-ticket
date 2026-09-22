@@ -7,6 +7,7 @@ import {
   ListTodo,
   LogOut,
   Moon,
+  Sun,
   UserRound,
 } from "lucide-react";
 import type { AppNotification, Person } from "../domain/models";
@@ -80,15 +81,15 @@ export function AppNavigation({
       </nav>
 
       <div className="sidebar-footer">
-        {person === "gui" && onToggleTheme && (
+        {onToggleTheme && (
           <button
             className="theme-toggle"
             type="button"
             aria-pressed={theme === "dark-premium"}
             onClick={onToggleTheme}
           >
-            <Moon size={17} aria-hidden="true" />
-            <span>{theme === "dark-premium" ? "Tema Dark & Premium ativo" : "Ativar tema Dark & Premium"}</span>
+            {theme === "default" ? <Moon size={17} aria-hidden="true" /> : <Sun size={17} aria-hidden="true" />}
+            <span>{theme === "default" ? "Modo escuro" : "Modo claro"}</span>
           </button>
         )}
         <button className="notification-shortcut" onClick={onOpenNotifications}>

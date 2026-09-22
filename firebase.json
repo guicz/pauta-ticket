@@ -1,4 +1,5 @@
 {
+  "functions": [{ "source": "functions", "codebase": "pauta-services", "ignore": ["node_modules", ".env*", "*.log"] }],
   "firestore": {
     "rules": "firestore.rules"
   },
@@ -26,7 +27,7 @@
         ]
       },
       {
-        "source": "/@(index.html|notifications-sw.js)",
+        "source": "/@(index.html|notifications-sw.js|manifest.webmanifest|offline.html)",
         "headers": [
           {
             "key": "Cache-Control",

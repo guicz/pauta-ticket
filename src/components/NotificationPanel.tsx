@@ -3,7 +3,7 @@ import type { AppNotification } from "../domain/models";
 import { BrowserNotificationSettings } from "./BrowserNotificationSettings";
 import { notificationTaskId } from "../domain/notificationTarget";
 
-export function NotificationPanel({ notifications, onClose, onMarkAllRead, onOpenTask }: { notifications: AppNotification[]; onClose: () => void; onMarkAllRead: () => void; onOpenTask: (taskId: string) => void }) {
+export function NotificationPanel({ notifications, onClose, onMarkAllRead, onOpenTask, demo = false }: { notifications: AppNotification[]; onClose: () => void; onMarkAllRead: () => void; onOpenTask: (taskId: string) => void; demo?: boolean }) {
   return (
     <div className="panel-backdrop" role="presentation" onMouseDown={(event) => event.target === event.currentTarget && onClose()}>
       <aside className="notification-panel" aria-label="Notificações">
@@ -12,7 +12,7 @@ export function NotificationPanel({ notifications, onClose, onMarkAllRead, onOpe
           <button className="icon-button" onClick={onClose} aria-label="Fechar notificações"><X size={20} /></button>
         </header>
         <button className="mark-read" onClick={onMarkAllRead}><CheckCheck size={16} /> Marcar todas como lidas</button>
-        <BrowserNotificationSettings />
+        <BrowserNotificationSettings demo={demo} />
         <div className="notification-list">
           {notifications.map((notification) => (
             <article key={notification.id} className={`notification-item ${notification.read ? "read" : ""} level-${notification.level}`}>

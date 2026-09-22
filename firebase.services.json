@@ -1,0 +1,16 @@
+{
+  "functions": [{ "source": "functions", "codebase": "pauta-services", "ignore": ["node_modules", ".env*", "*.log"] }],
+  "firestore": { "rules": "firestore.rules" },
+  "hosting": {
+    "public": "dist",
+    "ignore": ["firebase.json", "**/.*", "**/node_modules/**"],
+    "rewrites": [
+      { "source": "/api/calendar/callback", "function": { "functionId": "calendarCallback", "region": "us-central1" } },
+      { "source": "**", "destination": "/index.html" }
+    ],
+    "headers": [
+      { "source": "/assets/**", "headers": [{ "key": "Cache-Control", "value": "public,max-age=31536000,immutable" }] },
+      { "source": "/@(index.html|notifications-sw.js|manifest.webmanifest|offline.html)", "headers": [{ "key": "Cache-Control", "value": "no-cache" }] }
+    ]
+  }
+}

@@ -1,4 +1,4 @@
-import { collection, doc, onSnapshot, serverTimestamp, setDoc, type Unsubscribe } from "firebase/firestore";
+import { collection, doc, onSnapshot, query, where, serverTimestamp, setDoc, type Unsubscribe } from "firebase/firestore";
 import type { AppState } from "../domain/models";
 import type { Task } from "../domain/models";
 import { seedState } from "../data/seed";
@@ -60,4 +60,9 @@ export function subscribeToDemandRequests(onTasks: (tasks: Task[]) => void, onEr
   return onSnapshot(collection(db, "demandRequests"), (snapshot) => {
     onTasks(snapshot.docs.map((item) => item.data() as Task));
   }, (error) => onError(error.message));
+}
+
+export function subscribeToOwnRequests(uid: string, onTasks: (tasks: Task[]) => void): Unsubscribe {
+  if (!db) return () => undefined;
+  return onSnapshot(query(collection(db, "demandRequests"), where("requesterUid", "==", uid)), snapshot => onTasks(snapshot.docs.map(item => item.data() as Task)));
 }

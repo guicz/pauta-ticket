@@ -43,6 +43,7 @@ export interface Task {
   requester: Person;
   requesterName?: string;
   requesterEmail?: string;
+  requesterUid?: string;
   priority: Priority;
   status: TaskStatus;
   estimatedMinutes: number;

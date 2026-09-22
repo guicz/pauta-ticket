@@ -1,42 +1,29 @@
 # Pauta Fluxo
 
-MVP local para organizar as pautas da Pati e a execução do Guilherme. A
-aplicação protege uma tarefa ativa, planeja por capacidade, registra mudanças
-de estimativa sem travar o trabalho e gera um relatório semanal que separa
-entregas concluídas, progresso parcial e ações de gestão.
+Task planning for Pati, focused execution for Guilherme, and individual requests for attendance accounts. React, TypeScript, Vite, Firebase Authentication and Firestore.
 
-## Executar
+All accounts share the mobile-first visual system, DM Sans and a light default with an optional dark mode. Each role retains its own views and actions.
+
+## Development
 
 ```powershell
-npm install
+npm ci
 npm run dev
 ```
 
-## Firebase
+Without Firebase configuration, development uses the local demo. Copy `.env.example` into `.env.local` for authenticated development or `.env.production` for production. Production builds require complete Firebase configuration and cannot silently publish demo mode.
 
-O app usa Firebase Authentication (Google ou e-mail/senha) e um documento compartilhado no Cloud Firestore. Copie `.env.example` para `.env.local` e preencha a configuração do app Web.
-
-As regras em `firestore.rules` restringem o banco aos dois e-mails autorizados da equipe.
-
-## Publicação
-
-```bash
-npm run deploy
-```
-
-O comando valida o build e publica a pasta `dist` no Firebase Hosting do projeto configurado em `.firebaserc`.
-
-Abra `http://127.0.0.1:5173/`.
-
-## Verificar
+## Checks
 
 ```powershell
 npm test
+npm ci --prefix functions
+npm run test:services
 npm run build
 ```
 
-## Estado da entrega
+## Hosting
 
-Este é um `local-mvp`. Os dados ficam no armazenamento local do navegador. Não
-há login real, sincronização entre dispositivos, envio por WhatsApp ou
-notificações com o aplicativo fechado.
+`npm run deploy` builds and publishes to Firebase Hosting using `.firebaserc`. Version 0.2.0 includes the installable PWA and an offline reconnect screen.
+
+Background notifications and Google Calendar synchronization are gated by `VITE_SERVICES_ENABLED`. Keep it false until billing, OAuth and backend deployment are configured and validated. Read [activation and limitations](docs/INTEGRATIONS.md) before `npm run deploy:services`.

@@ -11,7 +11,10 @@ import { notificationTaskId } from "./domain/notificationTarget";
 import { LoginScreen } from "./components/LoginScreen";
 import { AttendanceRequest } from "./components/AttendanceRequest";
 import type { ActivityEvent, AppNotification, AppState, EvidenceAttachment, Person, Task } from "./domain/models";
-import { subscribeToWorkspace, saveWorkspace, submitDemandRequest, subscribeToDemandRequests, updateDemandRequest } from "./lib/cloudState";
+import { subscribeToWorkspace, saveWorkspace, submitDemandRequest, subscribeToDemandRequests, subscribeToOwnRequests, updateDemandRequest } from "./lib/cloudState";
+import { AppPreferences } from "./components/AppPreferences";
+import { disconnectPush, markInboxRead, servicesConfigured, subscribeInbox, subscribePush } from "./lib/integrations";
+import { setNotificationAccount } from "./lib/pwa";
 import { auth, firebaseConfigured, personFromEmail } from "./lib/firebase";
 import { loadState, resetState, saveState } from "./lib/storage";
 import { nextOccurrence } from "./domain/recurrence";
@@ -20,7 +23,13 @@ import { useTaskNotifications } from "./lib/useTaskNotifications";
 
 const id = (prefix: string) => `${prefix}-${Date.now()}-${Math.random().toString(16).slice(2)}`;
 type GuiTheme = "default" | "dark-premium";
-const GUI_THEME_STORAGE_KEY = "pauta-gui-theme";
+const GUI_THEME_STORAGE_KEY = "pauta-theme-v2";
+
+function viewForPerson(person: Person, view: AppView): AppView {
+  if (person === "gui") return "focus";
+  if (person === "atendimento") return "request";
+  return ["overview", "queue", "report", "daily"].includes(view) ? view : "overview";
+}
 
 export function App() {
   const [state, setState] = useState<AppState>(() => loadState());
@@ -33,31 +42,63 @@ export function App() {
   const [demoMode, setDemoMode] = useState(!firebaseConfigured);
   const [cloudReady, setCloudReady] = useState(false);
   const [syncLabel, setSyncLabel] = useState("Conectando…");
-  const [guiTheme, setGuiTheme] = useState<GuiTheme>(() => {
+  const [inbox, setInbox] = useState<{ uid: string; items: AppNotification[] } | null>(null);
+  const [serviceMessage, setServiceMessage] = useState("");
+  const [online, setOnline] = useState(navigator.onLine);
+  const [ownRequests, setOwnRequests] = useState<Task[]>([]);
+  const [themes, setThemes] = useState<Record<string, GuiTheme>>(() => {
     try {
-      return window.localStorage.getItem(GUI_THEME_STORAGE_KEY) === "dark-premium" ? "dark-premium" : "default";
+      const saved = JSON.parse(window.localStorage.getItem(GUI_THEME_STORAGE_KEY) ?? "{}");
+      return saved && typeof saved === "object" && !Array.isArray(saved) ? saved : {};
     } catch {
-      return "default";
+      return {};
     }
   });
+  const themeAccount = demoMode ? `demo:${demoPerson}` : user?.uid ?? "signed-out";
+  const guiTheme: GuiTheme = themes[themeAccount] === "dark-premium" ? "dark-premium" : "default";
+  const setGuiTheme = (update: (current: GuiTheme) => GuiTheme) => setThemes(current => ({ ...current, [themeAccount]: update(guiTheme) }));
   const lastCloudState = useRef("");
   const demandRequestsRef = useRef<Task[]>([]);
 
   const person = demoMode ? demoPerson : personFromEmail(user?.email ?? null);
-  const { reminders, currentReminder, markRemindersRead } = useTaskNotifications(state, person, demoMode ? `demo:${person}` : user?.uid ?? "signed-out", demoMode || Boolean(user && cloudReady && person !== "atendimento"));
+  const visibleView = viewForPerson(person, view);
+  const { reminders, currentReminder, markRemindersRead } = useTaskNotifications(state, person, demoMode ? `demo:${person}` : user?.uid ?? "signed-out", demoMode || Boolean(user && cloudReady && person !== "atendimento" && !servicesConfigured));
 
   useEffect(() => {
-    const activeTheme = person === "gui" ? guiTheme : "default";
+    const update = () => setOnline(navigator.onLine);
+    window.addEventListener("online", update); window.addEventListener("offline", update);
+    return () => { window.removeEventListener("online", update); window.removeEventListener("offline", update); };
+  }, []);
+
+  useEffect(() => {
+    const uid = !demoMode ? user?.uid : undefined;
+    void setNotificationAccount(uid ?? null).catch(() => undefined);
+    if (!uid) return;
+    const stop = subscribeInbox(uid, items => setInbox({ uid, items }), () => setServiceMessage("Não foi possível carregar seus avisos. Tente novamente ao reconectar."));
+    // Rebind an existing permission after account changes without opening a permission prompt.
+    if (servicesConfigured && typeof Notification !== "undefined" && Notification.permission === "granted") void subscribePush().catch(() => setServiceMessage("Reative as notificações em Aplicativo e integrações."));
+    return stop;
+  }, [user?.uid, demoMode]);
+
+  useEffect(() => {
+    setOwnRequests([]);
+    if (demoMode || person !== "atendimento" || !user || !servicesConfigured) return;
+    return subscribeToOwnRequests(user.uid, setOwnRequests);
+  }, [user?.uid, person, demoMode]);
+
+  useEffect(() => {
+    const activeTheme = guiTheme;
     document.documentElement.dataset.uiTheme = activeTheme;
+    document.querySelector('meta[name="theme-color"]')?.setAttribute("content", guiTheme === "default" ? "#f4f6f8" : "#07111b");
     try {
-      window.localStorage.setItem(GUI_THEME_STORAGE_KEY, guiTheme);
+      window.localStorage.setItem(GUI_THEME_STORAGE_KEY, JSON.stringify(themes));
     } catch {
       // A blocked storage only means the visual preference is session-local.
     }
     return () => {
       delete document.documentElement.dataset.uiTheme;
     };
-  }, [guiTheme, person]);
+  }, [guiTheme, themes]);
 
   useEffect(() => {
     if (new URLSearchParams(window.location.search).get("notifications") === "1") setNotificationsOpen(true);
@@ -146,9 +187,13 @@ export function App() {
     window.scrollTo({ top: 0, behavior: "auto" });
   }, [person, view]);
 
+  useEffect(() => {
+    if (view !== visibleView) setView(visibleView);
+  }, [view, visibleView]);
+
   const notifications = useMemo(
-    () => [...reminders, ...state.notifications].filter((notification) => notification.recipient === person),
-    [person, state.notifications, reminders],
+    () => !demoMode && servicesConfigured ? inbox?.uid === user?.uid ? inbox?.items ?? [] : [] : [...reminders, ...state.notifications].filter((notification) => notification.recipient === person),
+    [person, state.notifications, reminders, demoMode, inbox, user?.uid],
   );
 
   function appendEvent(event: Omit<ActivityEvent, "id" | "createdAt">): ActivityEvent {
@@ -164,8 +209,8 @@ export function App() {
   function createTask(task: Omit<Task, "id" | "createdAt" | "updatedAt">) {
     const now = new Date().toISOString();
     const fallbackRequesterName = person === "gui" ? "Guilherme" : person === "atendimento" ? "Atendimento" : "Pati";
-    const nextTask: Task = { ...task, id: id("task"), requesterName: task.requesterName ?? user?.displayName ?? fallbackRequesterName, requesterEmail: task.requesterEmail ?? user?.email ?? undefined, assignee: person === "atendimento" ? "pati" : task.assignee, requester: person === "atendimento" ? "atendimento" : task.requester, status: person === "atendimento" ? "inbox" : task.status, createdAt: now, updatedAt: now };
-    if (person === "atendimento" && !demoMode) void submitDemandRequest(nextTask);
+    const nextTask: Task = { ...task, id: id("task"), requesterName: task.requesterName ?? user?.displayName ?? fallbackRequesterName, requesterEmail: task.requesterEmail ?? user?.email ?? undefined, requesterUid: user?.uid, assignee: person === "atendimento" ? "pati" : task.assignee, requester: person === "atendimento" ? "atendimento" : task.requester, status: person === "atendimento" ? "inbox" : task.status, createdAt: now, updatedAt: now };
+    if (person === "atendimento" && !demoMode) return submitDemandRequest(nextTask);
     setState((current) => ({
       ...current,
       tasks: [...current.tasks, nextTask],
@@ -405,6 +450,10 @@ export function App() {
   }
 
   function markNotificationsRead() {
+    if (!demoMode && servicesConfigured && user) {
+      void markInboxRead(user.uid).catch(() => setServiceMessage("Não foi possível marcar seus avisos como lidos."));
+      return;
+    }
     markRemindersRead();
     setState((current) => ({
       ...current,
@@ -417,6 +466,13 @@ export function App() {
     setDemoPerson(nextPerson);
     setView(nextPerson === "pati" ? "overview" : "focus");
     setNotificationsOpen(false);
+    setNotificationDemand(null);
+  }
+
+  async function leaveAccount() {
+    try { await disconnectPush(); } catch { /* The worker identity is cleared before removing the subscription. */ }
+    setNotificationsOpen(false); setNotificationDemand(null); setInbox(null);
+    if (auth) await signOut(auth);
   }
 
   if (!authReady) {
@@ -428,26 +484,29 @@ export function App() {
   }
 
   return (
-    <div className="app-frame" data-ui-theme={person === "gui" ? guiTheme : "default"}>
+    <div className="app-frame" data-ui-theme={guiTheme}>
       <AppNavigation
         person={person}
-        view={view}
+        view={visibleView}
         notifications={notifications}
         onChangePerson={changePerson}
-        onChangeView={setView}
+        onChangeView={(nextView) => setView(viewForPerson(person, nextView))}
         onOpenNotifications={() => setNotificationsOpen(true)}
         allowPersonSwitch={demoMode}
         syncLabel={syncLabel}
-        onSignOut={() => auth && void signOut(auth)}
+        onSignOut={() => void leaveAccount()}
         theme={guiTheme}
         onToggleTheme={() => setGuiTheme(current => current === "dark-premium" ? "default" : "dark-premium")}
       />
       <main className="app-main">
+        {!online && <p role="status" className="connection-banner">Sem conexão. Reconecte-se antes de alterar sua pauta.</p>}
+        {serviceMessage && <p role="status" className="connection-banner">{serviceMessage}</p>}
+        <div className="workspace-content" inert={!online || undefined}>
         {currentReminder && <div role="status"><button className="task-time-alert" onClick={() => { const taskId = notificationTaskId(currentReminder); if (taskId) setNotificationDemand(taskId); else setNotificationsOpen(true); }}>{currentReminder.message} <strong>Abrir demanda</strong></button></div>}
-        {person === "pati" && view !== "report" && view !== "daily" && (
+        {person === "pati" && visibleView !== "report" && visibleView !== "daily" && (
           <ManagerDashboard
             state={state}
-            queueOnly={view === "queue"}
+            queueOnly={visibleView === "queue"}
             onCreateTask={createTask}
             onPublishAgenda={publishAgenda}
             onApproveTask={approveTask}
@@ -458,8 +517,8 @@ export function App() {
             onChangeAssignee={changeAssignee}
           />
         )}
-        {person === "pati" && view === "report" && <WeeklyReport state={state} />}
-        {person === "pati" && view === "daily" && <DailyReport state={state} />}
+        {person === "pati" && visibleView === "report" && <WeeklyReport state={state} />}
+        {person === "pati" && visibleView === "daily" && <DailyReport state={state} />}
         {person === "atendimento" && <AttendanceRequest onCreate={createTask} />}
         {person === "gui" && (
           <ExecutorFocus
@@ -474,12 +533,17 @@ export function App() {
             onBlockTask={blockTask}
             onSubmitForReview={submitForReview}
             onOpenNotifications={() => setNotificationsOpen(true)}
+            theme={guiTheme}
+            onToggleTheme={() => setGuiTheme(current => current === "dark-premium" ? "default" : "dark-premium")}
           />
         )}
+        </div>
+        <AppPreferences key={demoMode ? `demo:${person}` : user?.uid} person={person} demo={demoMode} />
       </main>
 
       {notificationsOpen && (
         <NotificationPanel
+          demo={demoMode}
           notifications={notifications}
           onClose={() => setNotificationsOpen(false)}
           onMarkAllRead={markNotificationsRead}
@@ -487,10 +551,11 @@ export function App() {
         />
       )}
 
-      {notificationDemand && <NotificationTaskDialog task={(demoMode || cloudReady) ? state.tasks.find(task => task.id === notificationDemand && (person === "pati" || (person === "gui" && task.assignee === "gui"))) : undefined} loading={!demoMode && !cloudReady && person !== "atendimento"} onClose={() => { setNotificationDemand(null); const url = new URL(window.location.href); url.searchParams.delete("task"); window.history.replaceState(null, "", url); }} />}
+      {notificationDemand && <NotificationTaskDialog task={person === "atendimento" ? ownRequests.find(task => task.id === notificationDemand) : (demoMode || cloudReady) ? state.tasks.find(task => task.id === notificationDemand && (person === "pati" || (person === "gui" && task.assignee === "gui"))) : undefined} loading={!demoMode && !cloudReady && person !== "atendimento"} onClose={() => { setNotificationDemand(null); const url = new URL(window.location.href); url.searchParams.delete("task"); window.history.replaceState(null, "", url); }} />}
 
       {demoMode && (
         <div className="demo-controls">
+          <select aria-label="Perfil da demonstração" value={demoPerson} onChange={event => changePerson(event.target.value as Person)}><option value="pati">Demo Pati</option><option value="gui">Demo Guilherme</option><option value="atendimento">Demo Atendimento</option></select>
           {firebaseConfigured && <button className="demo-reset" onClick={() => setDemoMode(false)}>Entrar na conta</button>}
           <button
             className="demo-reset"

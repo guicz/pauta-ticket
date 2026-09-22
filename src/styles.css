@@ -1,7 +1,8 @@
 :root {
   color: #17211f;
   background: #f3f5f2;
-  font-family: "Aptos", "Segoe UI Variable", "Segoe UI", sans-serif;
+  font-family: "DM Sans", "Aptos", "Segoe UI Variable", "Segoe UI", sans-serif;
+  font-weight: 400;
   font-synthesis: none;
   text-rendering: optimizeLegibility;
   --ink: #17211f;
@@ -22,6 +23,7 @@
 }
 
 * { box-sizing: border-box; }
+button, input, textarea, select { font-family: inherit; }
 body {
   position: relative;
   margin: 0;
@@ -50,7 +52,7 @@ button { cursor: pointer; }
 button:disabled { cursor: not-allowed; opacity: 0.55; }
 button:focus-visible, input:focus-visible, textarea:focus-visible, select:focus-visible { outline: 3px solid rgba(28, 112, 98, 0.25); outline-offset: 2px; }
 h1, h2, h3, p { margin-top: 0; }
-h1, h2, h3 { font-family: "Bahnschrift", "Aptos Display", "Segoe UI", sans-serif; }
+h1, h2, h3 { font-family: inherit; }
 
 .app-frame { min-height: 100vh; display: grid; grid-template-columns: 16rem minmax(0, 1fr); gap: 0.85rem; padding: 0.85rem; }
 .app-main { min-width: 0; }

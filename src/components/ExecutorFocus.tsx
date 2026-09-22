@@ -4,6 +4,7 @@ import {
   ArrowRight,
   Bell,
   Brain,
+  CalendarDays,
   Check,
   CheckCircle2,
   ChevronRight,
@@ -17,16 +18,20 @@ import {
   Lightbulb,
   Link2,
   ListChecks,
+  MoreHorizontal,
   Network,
   NotebookPen,
   Pause,
   PauseCircle,
   Play,
+  Plus,
   RadioTower,
   RotateCcw,
   Save,
   Send,
+  Search,
   Sparkles,
+  Sun,
   Target,
   Trash2,
   X,
@@ -47,9 +52,11 @@ interface ExecutorFocusProps {
   onBlockTask: (taskId: string, reason: string) => void;
   onSubmitForReview: (taskId: string, evidence: string, attachment?: EvidenceAttachment) => void;
   onOpenNotifications: () => void;
+  theme?: "default" | "dark-premium";
+  onToggleTheme?: () => void;
 }
 
-export function ExecutorFocus({ state, notifications, onStartTask, onToggleStep, onCaptureMemory, onUpdateReturnPoint, onSaveEvidence, onRequestEstimate, onBlockTask, onSubmitForReview, onOpenNotifications }: ExecutorFocusProps) {
+export function ExecutorFocus({ state, notifications, onStartTask, onToggleStep, onCaptureMemory, onUpdateReturnPoint, onSaveEvidence, onRequestEstimate, onBlockTask, onSubmitForReview, onOpenNotifications, theme = "default", onToggleTheme }: ExecutorFocusProps) {
   const [estimateOpen, setEstimateOpen] = useState(false);
   const [blockOpen, setBlockOpen] = useState(false);
   const [reviewOpen, setReviewOpen] = useState(false);
@@ -89,147 +96,157 @@ export function ExecutorFocus({ state, notifications, onStartTask, onToggleStep,
     window.setTimeout(() => setMemorySaved(false), 2400);
   }
 
-  return (
-    <div className="page focus-page">
-      <FocusHeader unread={unread} onOpenNotifications={onOpenNotifications} />
-
-      <section className={`focus-priority-center demand-priority-${highlighted.priority}`} aria-label="Demanda prioritária">
-        <span className="eyebrow">{highlighted.id === active.id ? "SEU FOCO PRIORITÁRIO" : "MAIOR PRIORIDADE NA FILA"}</span>
-        <span className={`priority-badge priority-${highlighted.priority}`}>Prioridade {priorityLabel(highlighted.priority)}</span>
-        <h2>{highlighted.title}</h2>
-        <p>{highlighted.client} · {formatMinutes(highlighted.executorEstimateMinutes ?? highlighted.estimatedMinutes)}{highlighted.scheduledDate ? ` · ${highlighted.scheduledDate.split("-").reverse().join("/")}` : ""}</p>
-        {highlighted.id !== active.id && <span className="priority-context">{active.status === "active" ? "Em andamento" : "Disponível agora"}: {active.title}</span>}
-      </section>
-
-      <div className="focus-layout">
-        <section className={`now-card demand-priority-${active.priority}`}>
-          <header className="now-header">
-            <div><span className="now-pulse" /><span className="eyebrow">AGORA</span></div>
-            <span className="priority-badge">Prioridade {priorityLabel(active.priority)}</span>
-            <span className="client-chip">{active.client}</span>
-            {active.scheduledStart && <span className="client-chip">{active.scheduledStart}{active.scheduledEnd ? `–${active.scheduledEnd}` : ""}</span>}
-          </header>
-
-          <div className="now-title">
-            <p>{active.project}</p>
-            <h1>{active.title}</h1>
-          </div>
-
-          <section className="next-action-card" aria-label="Próxima ação" data-tooltip={nextStep ? "Concentre-se somente neste passo. As outras etapas podem esperar." : active.doneCondition}>
-            <span className="eyebrow">{completedSteps ? "CONTINUE DAQUI" : "COMECE POR AQUI"}</span>
-            <h2>{nextStep?.label ?? "Prepare a prova da entrega"}</h2>
-            {active.status === "active" && nextStep && <button className="button primary" onClick={() => onToggleStep(active.id, nextStep.id)}><Check size={17} /> Concluí este passo</button>}
-            {active.status === "active" && !nextStep && <button className="button primary" onClick={() => setReviewOpen(true)}><Send size={17} /> Preparar envio</button>}
-          </section>
-
-          {active.status !== "active" ? (
-            <div className="start-state">
-              <p>Esta é a primeira ação liberada na sua pauta.</p>
-              <button className="button primary large" onClick={() => onStartTask(active.id)}><Play size={19} /> Iniciar tarefa</button>
-            </div>
-          ) : (
-            <>
-              <div className="reason-box" data-tooltip={active.consequence || active.expectedResult}>
-                <Sparkles size={18} />
-                <div><strong>Por que agora</strong></div>
-              </div>
-
-              <div className="done-condition"><span>PRONTO QUANDO</span><p>{active.doneCondition}</p></div>
-
-              {active.steps.length > 0 && (
-                <div className="checklist">
-                  <div className="checklist-head"><strong>Etapas</strong><span>{completedSteps} de {active.steps.length}</span></div>
-                  {active.steps.map((step) => (
-                    <label key={step.id} className={`check-row ${step.done ? "done" : ""}`}>
-                      <input type="checkbox" checked={step.done} onChange={() => onToggleStep(active.id, step.id)} />
-                      <span className="custom-check">{step.done && <Check size={14} />}</span>
-                      <span>{step.label}</span>
-                    </label>
-                  ))}
-                  <div className="progress-track" aria-label={`${progress}% concluído`}><span style={{ width: `${progress}%` }} /></div>
-                </div>
-              )}
-
-              <div className="time-strip">
-                <Clock3 size={19} />
-                <div><span>Estimativa atual</span><strong>{formatMinutes(active.executorEstimateMinutes ?? active.estimatedMinutes)}</strong></div>
-                <button onClick={() => setEstimateOpen(true)}>Preciso de mais tempo</button>
-              </div>
-
-              <div className="focus-actions">
-                <button className="button secondary" onClick={() => setBlockOpen(true)}><PauseCircle size={18} /> Estou bloqueado</button>
-                <button className="button primary" disabled={!canSubmit} onClick={() => setReviewOpen(true)}><Send size={18} /> Enviar para validação</button>
-              </div>
-            </>
-          )}
-        </section>
-
-        <aside className="focus-side">
-          {unread > 0 && (
-            <button className="quiet-notice" onClick={onOpenNotifications}><Bell size={18} /><div><strong>{unread} atualizações aguardando</strong><span>Sua tarefa atual não mudou.</span></div><ChevronRight size={18} /></button>
-          )}
-          <section className="brain-card" aria-labelledby="brain-title">
-            <header className="brain-head">
-              <span className="brain-icon"><Brain size={19} /></span>
-              <div><span className="eyebrow">SEGUNDO CÉREBRO</span><h2 id="brain-title">Memória desta tarefa</h2></div>
-              <span className="memory-live"><i /> ativa</span>
-            </header>
-
-            <div className="brain-return">
-              <RotateCcw size={17} />
-              <div><span>ONDE VOCÊ PAROU</span><p>{returnPoint}</p></div>
-            </div>
-
-            <button className="brain-map-trigger" onClick={() => setMapOpen(true)} data-tooltip="Abra a visão visual com memórias, objetivo, rotina e evidências desta tarefa.">
-              <Network size={17} />
-              <span><strong>Ver mapa desta tarefa</strong></span>
-              <ChevronRight size={17} />
-            </button>
-
-            <details className="brain-context">
-              <summary><Lightbulb size={16} /><span>Contexto que não pode escapar</span><ChevronRight size={16} /></summary>
-              <div className="context-list">
-                <p><strong>Objetivo</strong>{active.expectedResult}</p>
-                <p><strong>Critério de pronto</strong>{active.doneCondition}</p>
-                {active.consequence && <p><strong>Impacto</strong>{active.consequence}</p>}
-              </div>
-            </details>
-
-            <div className="brain-capture">
-              <label htmlFor="memory-capture" data-tooltip="Registre uma ideia para depois sem trocar a tarefa atual."><Inbox size={16} /><span>Surgiu outra coisa?</span></label>
-              <div className="capture-row">
-                <input
-                  id="memory-capture"
-                  value={memoryDraft}
-                  onChange={(event) => { setMemoryDraft(event.target.value); setMemorySaved(false); }}
-                  onKeyDown={(event) => event.key === "Enter" && saveMemory()}
-                  placeholder="Ex.: pedir a foto nova depois"
-                />
-                <button onClick={saveMemory} disabled={!memoryDraft.trim()} aria-label="Guardar para depois"><ArrowRight size={17} /></button>
-              </div>
-              {memorySaved && <span className="capture-success"><Check size={14} /> Guardado para depois, sem mudar seu foco.</span>}
-            </div>
-
-            {(active.memoryNotes?.length ?? 0) > 0 && (
-              <div className="memory-notes">
-                <span>LEMBRETES GUARDADOS</span>
-                {active.memoryNotes?.slice(0, 2).map((note) => <p key={note.id}>{note.text}</p>)}
-              </div>
-            )}
-          </section>
-          {highlighted.id === active.id && <div className={`next-card ${next ? `demand-priority-${next.priority}` : ""}`} data-tooltip={next ? "A ordem desta tarefa pode ser revisada pela Pati." : "A fila está vazia depois da tarefa atual."}>
-            <span className="eyebrow">{next && ["urgent", "high"].includes(next.priority) ? "PRÓXIMA PRIORIDADE" : "DEPOIS"}</span>
-            {next && <span className="priority-badge">Prioridade {priorityLabel(next.priority)}</span>}
-            {next ? <><h2>{next.title}</h2><p>{next.client} · {formatMinutes(next.executorEstimateMinutes ?? next.estimatedMinutes)}</p></> : <p>Nenhuma tarefa na sequência.</p>}
-          </div>}
-          <div className="focus-rule" data-tooltip="Novas demandas entram na fila, mas nunca substituem a tarefa que você iniciou."><AlertCircle size={17} /><span className="sr-only">Novas demandas não substituem a tarefa atual.</span></div>
-        </aside>
-      </div>
-
+    return <>
+      <GuiPremiumFocus
+        state={state}
+        active={active}
+        highlighted={highlighted}
+        next={next}
+        unread={unread}
+        completedSteps={completedSteps}
+        progress={progress}
+        nextStep={nextStep}
+        canSubmit={canSubmit}
+        returnPoint={returnPoint}
+        memoryDraft={memoryDraft}
+        memorySaved={memorySaved}
+        onStartTask={onStartTask}
+        onToggleStep={onToggleStep}
+        onRequestMoreTime={() => setEstimateOpen(true)}
+        onBlock={() => setBlockOpen(true)}
+        onReview={() => setReviewOpen(true)}
+        onOpenMap={() => setMapOpen(true)}
+        onSaveMemory={saveMemory}
+        onMemoryDraftChange={(value) => { setMemoryDraft(value); setMemorySaved(false); }}
+        onToggleTheme={undefined}
+      />
       {estimateOpen && <EstimateDialog task={active} onClose={() => setEstimateOpen(false)} onSubmit={(minutes, reason) => { onRequestEstimate(active.id, minutes, reason); setEstimateOpen(false); }} />}
       {blockOpen && <TextDialog title="O que está bloqueando?" label="Motivo do bloqueio" placeholder="Ex.: Falta acesso à conta do cliente" action="Registrar bloqueio" onClose={() => setBlockOpen(false)} onSubmit={(value) => { onBlockTask(active.id, value); setBlockOpen(false); }} />}
       {reviewOpen && <EvidenceDialog onClose={() => setReviewOpen(false)} onSubmit={(value, attachment) => { onSubmitForReview(active.id, value, attachment); setReviewOpen(false); }} />}
       {mapOpen && <BrainMapDialog task={active} returnPoint={returnPoint} onToggleStep={onToggleStep} onCaptureMemory={onCaptureMemory} onUpdateReturnPoint={onUpdateReturnPoint} onSaveEvidence={onSaveEvidence} onClose={() => setMapOpen(false)} />}
+    </>;
+}
+
+interface GuiPremiumFocusProps {
+  state: AppState;
+  active: Task;
+  highlighted: Task;
+  next?: Task;
+  unread: number;
+  completedSteps: number;
+  progress: number;
+  nextStep?: Task["steps"][number];
+  canSubmit: boolean;
+  returnPoint: string;
+  memoryDraft: string;
+  memorySaved: boolean;
+  onStartTask: (taskId: string) => void;
+  onToggleStep: (taskId: string, stepId: string) => void;
+  onRequestMoreTime: () => void;
+  onBlock: () => void;
+  onReview: () => void;
+  onOpenMap: () => void;
+  onSaveMemory: () => void;
+  onMemoryDraftChange: (value: string) => void;
+  onToggleTheme?: () => void;
+}
+
+function GuiPremiumFocus({ state, active, highlighted, next, unread, completedSteps, progress, nextStep, canSubmit, returnPoint, memoryDraft, memorySaved, onStartTask, onToggleStep, onRequestMoreTime, onBlock, onReview, onOpenMap, onSaveMemory, onMemoryDraftChange, onToggleTheme }: GuiPremiumFocusProps) {
+  const [search, setSearch] = useState("");
+  const [showAll, setShowAll] = useState(false);
+  const today = new Intl.DateTimeFormat("en-CA", { timeZone: "America/Sao_Paulo" }).format(new Date());
+  const priorityOrder = { urgent: 0, high: 1, normal: 2, low: 3 };
+  const todayTasks = state.tasks
+    .filter((task) => task.assignee === "gui" && task.scheduledDate === today && task.status !== "completed" && task.status !== "inbox")
+    .sort((a, b) => priorityOrder[a.priority] - priorityOrder[b.priority]);
+  const fallbackTasks = [active, ...(next ? [next] : []), ...state.tasks.filter((task) => task.assignee === "gui" && task.id !== active.id && task.id !== next?.id && task.status !== "completed" && task.status !== "inbox")];
+  const availableRows = (showAll || !todayTasks.length ? fallbackTasks : todayTasks).filter(task => `${task.title} ${task.client} ${task.project}`.toLocaleLowerCase("pt-BR").includes(search.toLocaleLowerCase("pt-BR")));
+  const taskRows = showAll || search ? availableRows : availableRows.slice(0, 6);
+  const displayDate = (value?: string) => value ? value.split("-").reverse().join("/") : "Sem data";
+  const displayTime = (task: Task) => task.scheduledStart ? `${task.scheduledStart}${task.scheduledEnd ? `–${task.scheduledEnd}` : ""}` : "Sem horário";
+  const heroDate = displayDate(highlighted.scheduledDate);
+  const doneDate = displayDate(active.deadline ?? active.scheduledDate);
+
+  return (
+    <div className="page pauta-premium-page">
+      <header className="pauta-premium-topbar">
+        <label className="pauta-premium-search"><Search size={20} aria-hidden="true" /><input aria-label="Buscar minhas tarefas" placeholder="Buscar minhas tarefas..." value={search} onChange={event => setSearch(event.target.value)} /></label>
+        <div className="pauta-premium-top-actions">
+          {onToggleTheme && <button className="pauta-premium-icon-button" type="button" onClick={onToggleTheme} aria-label="Ativar modo claro" title="Ativar modo claro"><Sun size={21} /></button>}
+          <span className="pauta-premium-avatar" aria-hidden="true">G</span>
+        </div>
+      </header>
+
+      <section className="pauta-premium-welcome">
+        <div>
+          <p className="pauta-premium-date">{formatLongDate()}</p>
+          <h1>Bom dia, Guilherme<span>.</span></h1>
+          <p>Foco, execução e resultados.</p>
+        </div>
+        <div className="pauta-premium-welcome-actions">
+          <p>“Grandes resultados<br />são a soma de pequenas<br />ações bem executadas.”</p>
+        </div>
+      </section>
+
+      <section className="pauta-premium-hero" aria-label="Demanda prioritária">
+        <div>
+          <span className="pauta-premium-eyebrow">SEU FOCO PRIORITÁRIO</span>
+          <h2>{highlighted.title}</h2>
+          <div className="pauta-premium-hero-meta"><span>{highlighted.client} · {formatMinutes(highlighted.executorEstimateMinutes ?? highlighted.estimatedMinutes)} · {heroDate}</span><span className="pauta-premium-hero-badge">Prioridade {priorityLabel(highlighted.priority)}</span></div>
+        </div>
+        <span className="pauta-premium-target" aria-hidden="true"><Target size={54} strokeWidth={1.8} /></span>
+      </section>
+
+      <section className="pauta-premium-now" aria-label="Tarefa atual">
+        <header className="pauta-premium-now-head">
+          <div className="pauta-premium-now-label"><i /> <span>AGORA</span></div>
+          <div className="pauta-premium-now-meta"><span className={`pauta-premium-priority pauta-premium-priority-${active.priority}`}>Prioridade {priorityLabel(active.priority)}</span><span className="pauta-premium-chip">{active.client}</span>{active.scheduledStart && <span className="pauta-premium-chip pauta-premium-time-chip">{displayTime(active)}</span>}<span className="pauta-premium-more" aria-hidden="true"><MoreHorizontal size={20} /></span></div>
+        </header>
+        <div className="pauta-premium-now-body">
+          <p className="pauta-premium-project">{active.project}</p>
+          <h2>{active.title}</h2>
+          <p className="pauta-premium-next-copy">{nextStep?.label ?? "Prepare a prova da entrega"}</p>
+          <div className="pauta-premium-progress"><progress aria-label="Progresso da tarefa" max={100} value={progress} /><b>{progress}%</b></div>
+          <div className="pauta-premium-now-actions">
+            {active.status === "active" && nextStep ? <button className="pauta-premium-button pauta-premium-button-primary" onClick={() => onToggleStep(active.id, nextStep.id)}><Check size={18} /> Concluí este passo</button> : active.status === "active" ? <button className="pauta-premium-button pauta-premium-button-primary" onClick={onReview}><Check size={18} /> Preparar envio</button> : <button className="pauta-premium-button pauta-premium-button-primary" onClick={() => onStartTask(active.id)}><Play size={18} /> Começar agora</button>}
+            <button className="pauta-premium-button pauta-premium-button-secondary" onClick={onOpenMap}><ListChecks size={18} /> Detalhes</button>
+          </div>
+        </div>
+      </section>
+
+      <section className="pauta-premium-done-strip" aria-label="Condição de conclusão">
+        <div className="pauta-premium-done-date"><span className="pauta-premium-eyebrow">PRONTO QUANDO</span><p>{active.doneCondition}</p><strong><CalendarDays size={18} /> {doneDate}</strong></div>
+        <div className="pauta-premium-estimate"><span>Estimativa atual</span><strong>{formatMinutes(active.executorEstimateMinutes ?? active.estimatedMinutes)}</strong></div>
+        <button className="pauta-premium-more-time" onClick={onRequestMoreTime}>Preciso de mais tempo</button>
+        <div className="pauta-premium-done-actions"><button className="pauta-premium-button pauta-premium-button-secondary" onClick={onBlock}>◉ Estou bloqueado</button><button className="pauta-premium-button pauta-premium-button-primary" disabled={!canSubmit} onClick={onReview}><Check size={18} /> Enviar para validação</button></div>
+      </section>
+
+      <section className="pauta-premium-today" aria-labelledby="pauta-premium-today-title">
+        <header><div><span className="pauta-premium-eyebrow" id="pauta-premium-today-title">{showAll || !todayTasks.length ? "MINHAS TAREFAS" : "MINHAS TAREFAS DE HOJE"}</span><strong>{availableRows.length}</strong></div><button className="pauta-premium-view-all" onClick={() => setShowAll(value => !value)}>{showAll ? "Ver hoje" : "Ver todas"} <ArrowRight size={17} /></button></header>
+        <div className="pauta-premium-task-list">
+          {taskRows.length === 0 && <p>Nenhuma tarefa encontrada.</p>}
+          {taskRows.map((task) => <div className={`pauta-premium-task-row ${task.id === active.id ? "is-active" : ""}`} key={task.id}>
+            <span className={`pauta-premium-task-check ${task.status === "active" ? "is-active" : ""}`} aria-hidden="true">{task.status === "active" ? "•" : ""}</span>
+            <div className="pauta-premium-task-copy"><strong>{task.title}</strong><small>{task.project}</small></div>
+            <span className="pauta-premium-task-project">{task.client}</span>
+            <span className="pauta-premium-task-time">{displayTime(task)}</span>
+            <span className={`pauta-premium-row-priority pauta-premium-row-${task.priority}`}>{priorityLabel(task.priority)}</span>
+            <MoreHorizontal size={18} aria-hidden="true" />
+          </div>)}
+        </div>
+      </section>
+
+      <details className="pauta-premium-support">
+        <summary>Contexto e memória desta tarefa <ChevronRight size={17} /></summary>
+        <div className="pauta-premium-support-body">
+          <p><strong>Onde você parou</strong>{returnPoint}</p>
+          <p><strong>Pronto quando</strong>{active.doneCondition}</p>
+          <button className="pauta-premium-button pauta-premium-button-secondary" onClick={onOpenMap}>Ver mapa desta tarefa</button>
+          <label><Inbox size={16} /> Surgiu outra coisa?</label>
+          <div className="pauta-premium-memory-input"><input value={memoryDraft} onChange={(event) => onMemoryDraftChange(event.target.value)} onKeyDown={(event) => event.key === "Enter" && onSaveMemory()} placeholder="Anote algo para depois..." /><button onClick={onSaveMemory} disabled={!memoryDraft.trim()} aria-label="Guardar para depois"><ArrowRight size={17} /></button></div>
+          {memorySaved && <span className="pauta-premium-memory-saved"><Check size={14} /> Guardado sem trocar a tarefa.</span>}
+        </div>
+      </details>
     </div>
   );
 }

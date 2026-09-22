@@ -10,3 +10,6 @@ dist/
 service-account*.json
 *.log
 *.tsbuildinfo
+functions/.env.*
+!functions/.env.example
+functions/.secret.local
