@@ -31,6 +31,7 @@ export interface EvidenceAttachment {
 }
 
 export interface Task {
+  history?: { status: TaskStatus; priority: Priority; actor: Person; at: string }[];
   recurrence?: "none" | "daily" | "weekly" | "monthly";
   recurrenceParentId?: string;
   id: string;

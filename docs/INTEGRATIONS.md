@@ -1,4 +1,16 @@
-# PWA and integrations: release 0.2.0
+# PWA and integrations: release 0.3.0
+
+## Request history and priority access
+
+`functions-core` deploys independently of Calendar secrets. `saveTeamWorkspace` validates team identity and rejects Gui writes that add/remove tasks or change priorities. Browser writes to the workspace and request updates are denied; attendance creates normal-priority inbox requests only. Status/priority changes are mirrored transactionally into the original request document with activity entries. Existing activity is displayed as recorded, not reconstructed.
+
+Pati sees all requests; attendance reads only its UID/email-owned requests (email supports legacy requests without a UID). Gui sees assigned or self-requested tasks in the UI. The shared team workspace read policy is unchanged.
+
+Deploy core first, then Hosting and Firestore rules together. Existing browser tabs must reload. Do not roll back Hosting alone to a direct-write client without a compatible backend/rules rollback.
+
+Run `npm test`, `npm run test:services`, and `npm run test:rules`. The rules emulator needs Java 21; on this Windows machine, `JAVA_TOOL_OPTIONS=-Djdk.net.unixdomain.tmpdir=C:\Windows\Temp` avoids a Unix-domain socket path failure. Tests use `demo-pauta`, never production. Five emulator tests cover account isolation, normal initial priority, direct-write denial and transactional execution/history synchronization.
+
+The original 512px `/fav-dash-gui.png` is shared by favicon, Apple touch icon, PWA manifest and push icon. It is not marked maskable because the supplied artwork has no safe-area padding.
 
 All roles share the light/dark visual system. Light is the first-use default; each UID has its own device preference. Navigation remains role-specific.
 
@@ -6,7 +18,7 @@ The PWA includes a manifest, 192/512 icons and a versioned service worker. Offli
 
 ## Activation gates
 
-On 2026-09-22, the project reported `billingEnabled: false`. Hosting therefore uses `VITE_SERVICES_ENABLED=false`. Background push and Calendar synchronization have source code and deterministic tests, but are not active or verified end-to-end in production.
+Billing was enabled with owner approval on 2026-09-22. Hosting still uses `VITE_SERVICES_ENABLED=false` for optional push/Calendar integrations. Core workspace saving is independent of that flag. Background push and Calendar synchronization are not active or verified end-to-end in production.
 
 1. Obtain owner approval for billing required by Cloud Functions and Cloud Scheduler.
 2. Enable Calendar API and configure a Web OAuth client and consent screen. Authorized redirect: `https://ticket-pauta-gui.web.app/api/calendar/callback`.

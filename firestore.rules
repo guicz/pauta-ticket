@@ -11,7 +11,9 @@ service cloud.firestore {
     }
 
     match /workspaces/pauta-fluxo {
-      allow read, write: if isTeamMember();
+      allow read: if isTeamMember();
+      // Writes use saveTeamWorkspace, which validates task priorities server-side.
+      allow write: if false;
     }
 
     match /demandRequests/{requestId} {
@@ -20,14 +22,15 @@ service cloud.firestore {
         && request.resource.data.requesterEmail == request.auth.token.email
         && request.resource.data.requester == 'atendimento'
         && request.resource.data.assignee == 'pati'
+        && request.resource.data.priority == 'normal'
+        && !request.resource.data.keys().hasAny(['history'])
         && request.resource.data.status == 'inbox';
       allow read: if request.auth != null && (
         request.auth.token.email == 'patricia@dg5.com.br'
         || resource.data.requesterUid == request.auth.uid
+        || resource.data.requesterEmail == request.auth.token.email
       );
-      allow update: if request.auth != null
-        && request.auth.token.email == 'patricia@dg5.com.br'
-        && !request.resource.data.diff(resource.data).affectedKeys().hasAny(['requesterUid', 'requesterEmail']);
+      allow update: if false;
     }
 
     match /userInboxes/{uid}/items/{item} {

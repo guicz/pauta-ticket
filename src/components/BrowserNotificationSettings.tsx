@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { HelpTooltip } from "./HelpTooltip";
 import { browserNotificationPermission, enableBrowserNotifications, showBrowserNotification } from "../lib/browserNotifications";
 import { servicesConfigured, subscribePush } from "../lib/integrations";
 
@@ -20,8 +21,8 @@ export function BrowserNotificationSettings({ demo = false }: { demo?: boolean }
     try { const sent = await showBrowserNotification("Pauta Fluxo", "Tudo pronto para receber os avisos de demandas e de tempo.", "pauta-test"); setMessage(sent ? "Teste enviado. Se não aparecer, confira o modo Não Perturbe do sistema." : "Ative a permissão de notificações primeiro."); }
     catch { setMessage("Não foi possível enviar o teste. Confira as permissões do navegador."); }
   }
-  return <section className="browser-notification-settings"><strong>Suas notificações</strong><p>{servicesConfigured && !demo ? "Receba os avisos da sua conta mesmo com o app fechado. No iPhone, instale o app antes de ativar." : "Avisos disponíveis com o app aberto. O envio com o app fechado aguarda ativação do servidor."}</p>
-    {permission === "unsupported" ? <p>Notificações indisponíveis neste navegador. Os avisos continuam dentro do app.</p> : <div className="preference-actions"><button className="button secondary compact" disabled={busy} onClick={enable}>{busy ? "Ativando…" : "Ativar notificações nesta conta"}</button>{permission === "granted" && <button className="button secondary compact" onClick={test}>Testar notificação</button>}</div>}
+  return <section className="browser-notification-settings preference-row"><strong>Notificações</strong><HelpTooltip text={servicesConfigured && !demo ? "Avisos exclusivos da sua conta, mesmo com o app fechado. No iPhone, instale o aplicativo primeiro." : "Por enquanto, os avisos funcionam com o app aberto. Push em segundo plano ainda não está ativo."} />
+    {permission === "unsupported" ? <span>Indisponível</span> : <div className="preference-actions"><button className="button secondary compact" disabled={busy} onClick={enable}>{busy ? "Ativando…" : permission === "granted" ? "Reativar" : "Ativar"}</button>{permission === "granted" && <button className="button secondary compact" onClick={test}>Testar</button>}</div>}
     {message && <p role="status">{message}</p>}
   </section>;
 }

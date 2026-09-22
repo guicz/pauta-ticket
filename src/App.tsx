@@ -11,8 +11,9 @@ import { notificationTaskId } from "./domain/notificationTarget";
 import { LoginScreen } from "./components/LoginScreen";
 import { AttendanceRequest } from "./components/AttendanceRequest";
 import type { ActivityEvent, AppNotification, AppState, EvidenceAttachment, Person, Task } from "./domain/models";
-import { subscribeToWorkspace, saveWorkspace, submitDemandRequest, subscribeToDemandRequests, subscribeToOwnRequests, updateDemandRequest } from "./lib/cloudState";
+import { subscribeToWorkspace, saveWorkspace, submitDemandRequest, subscribeToDemandRequests, subscribeToOwnRequests } from "./lib/cloudState";
 import { AppPreferences } from "./components/AppPreferences";
+import { RequestHistory } from "./components/RequestHistory";
 import { disconnectPush, markInboxRead, servicesConfigured, subscribeInbox, subscribePush } from "./lib/integrations";
 import { setNotificationAccount } from "./lib/pwa";
 import { auth, firebaseConfigured, personFromEmail } from "./lib/firebase";
@@ -82,8 +83,8 @@ export function App() {
 
   useEffect(() => {
     setOwnRequests([]);
-    if (demoMode || person !== "atendimento" || !user || !servicesConfigured) return;
-    return subscribeToOwnRequests(user.uid, setOwnRequests);
+    if (demoMode || person !== "atendimento" || !user) return;
+    return subscribeToOwnRequests(user.uid, setOwnRequests, () => setServiceMessage("Não foi possível carregar o histórico."));
   }, [user?.uid, person, demoMode]);
 
   useEffect(() => {
@@ -232,8 +233,12 @@ export function App() {
   }
 
   function updateTask(taskId: string, changes: Partial<Task>) {
+    if (person !== "pati") return;
     setState((current) => ({
       ...current,
+      events: changes.priority && current.tasks.find(task => task.id === taskId)?.priority !== changes.priority
+        ? [appendEvent({ actor: "pati", kind: "priority_changed", taskId, description: `Prioridade alterada para ${{ urgent: "Urgente", high: "Alta", normal: "Normal", low: "Baixa" }[changes.priority]}.` }), ...current.events]
+        : current.events,
       tasks: current.tasks.map((task) =>
         task.id === taskId ? { ...task, ...changes, updatedAt: new Date().toISOString() } : task,
       ),
@@ -246,7 +251,6 @@ export function App() {
       const target = current.tasks.find((task) => task.id === taskId);
       if (!target || target.status !== "inbox") return current;
       const forwarded = { ...target, assignee: "gui" as const, status: "ready" as const, updatedAt: now };
-      if (!demoMode) void updateDemandRequest(forwarded);
       return {
         ...current,
         tasks: current.tasks.map((task) => task.id === taskId ? forwarded : task),
@@ -538,6 +542,7 @@ export function App() {
           />
         )}
         </div>
+        <RequestHistory tasks={person === "atendimento" ? demoMode ? state.tasks.filter(task => task.requester === "atendimento") : ownRequests : (demoMode || cloudReady) ? state.tasks.filter(task => person === "pati" || task.assignee === "gui" || task.requesterUid === user?.uid) : []} events={person === "atendimento" ? [] : state.events} manager={person === "pati"} onPriority={(taskId, priority) => updateTask(taskId, { priority })} />
         <AppPreferences key={demoMode ? `demo:${person}` : user?.uid} person={person} demo={demoMode} />
       </main>
 

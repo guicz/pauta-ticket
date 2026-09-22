@@ -3,6 +3,8 @@ import type { AppState } from "../domain/models";
 import type { Task } from "../domain/models";
 import { seedState } from "../data/seed";
 import { db } from "./firebase";
+import { getFunctions, httpsCallable } from "firebase/functions";
+import { auth } from "./firebase";
 
 const WORKSPACE_ID = "pauta-fluxo";
 
@@ -32,7 +34,7 @@ export function subscribeToWorkspace(
         onState(cleanState(snapshot.data() as Partial<AppState>));
         return;
       }
-      void setDoc(workspace, { ...seedState, syncedAt: serverTimestamp() }).catch((error: Error) => {
+      void saveWorkspace(seedState).catch((error: Error) => {
         onError(error.message);
       });
     },
@@ -41,16 +43,11 @@ export function subscribeToWorkspace(
 }
 
 export async function saveWorkspace(state: AppState): Promise<void> {
-  if (!db) return;
-  await setDoc(doc(db, "workspaces", WORKSPACE_ID), { ...state, syncedAt: serverTimestamp() });
+  if (!auth) return;
+  await httpsCallable(getFunctions(auth.app, "us-central1"), "saveTeamWorkspace")(JSON.parse(JSON.stringify(state)));
 }
 
 export async function submitDemandRequest(task: Task): Promise<void> {
-  if (!db) return;
-  await setDoc(doc(db, "demandRequests", task.id), { ...task, syncedAt: serverTimestamp() });
-}
-
-export async function updateDemandRequest(task: Task): Promise<void> {
   if (!db) return;
   await setDoc(doc(db, "demandRequests", task.id), { ...task, syncedAt: serverTimestamp() });
 }
@@ -62,7 +59,12 @@ export function subscribeToDemandRequests(onTasks: (tasks: Task[]) => void, onEr
   }, (error) => onError(error.message));
 }
 
-export function subscribeToOwnRequests(uid: string, onTasks: (tasks: Task[]) => void): Unsubscribe {
+export function subscribeToOwnRequests(uid: string, onTasks: (tasks: Task[]) => void, onError: () => void): Unsubscribe {
   if (!db) return () => undefined;
-  return onSnapshot(query(collection(db, "demandRequests"), where("requesterUid", "==", uid)), snapshot => onTasks(snapshot.docs.map(item => item.data() as Task)));
+  const owned = new Map<string, Task[]>();
+  const receive = (key: string, tasks: Task[]) => { owned.set(key, tasks); onTasks([...new Map([...owned.values()].flat().map(task => [task.id, task])).values()]); };
+  const stopUid = onSnapshot(query(collection(db, "demandRequests"), where("requesterUid", "==", uid)), snapshot => receive("uid", snapshot.docs.map(item => item.data() as Task)), onError);
+  const email = auth?.currentUser?.email;
+  const stopEmail = email ? onSnapshot(query(collection(db, "demandRequests"), where("requesterEmail", "==", email)), snapshot => receive("email", snapshot.docs.map(item => item.data() as Task)), onError) : () => {};
+  return () => { stopUid(); stopEmail(); };
 }

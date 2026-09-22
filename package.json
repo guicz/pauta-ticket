@@ -1,15 +1,16 @@
 {
   "name": "pauta-fluxo",
   "private": true,
-  "version": "0.2.1",
+  "version": "0.3.0",
   "type": "module",
   "scripts": {
     "dev": "vite",
     "build": "tsc -b && vite build",
     "deploy": "npm run build && firebase deploy --only hosting",
-    "test": "vitest run --exclude functions/**",
-    "test:watch": "vitest --exclude functions/**",
-    "test:services": "npm test --prefix functions",
+    "test": "vitest run --exclude functions/** --exclude functions-core/** --exclude scripts/**",
+    "test:watch": "vitest --exclude functions/** --exclude functions-core/** --exclude scripts/**",
+    "test:rules": "firebase emulators:exec --only firestore --project demo-pauta --config firebase.emulator.json \"node --test scripts/firestore-rules.test.mjs\"",
+    "test:services": "npm test --prefix functions && npm test --prefix functions-core",
     "deploy:services": "npm run build && firebase deploy --config firebase.services.json --only functions,firestore,hosting"
   },
   "dependencies": {
@@ -21,6 +22,7 @@
     "vite": "latest"
   },
   "devDependencies": {
+    "@firebase/rules-unit-testing": "^5.0.2",
     "@types/react": "latest",
     "@types/react-dom": "latest",
     "firebase-tools": "^15.29.0",

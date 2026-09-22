@@ -3,10 +3,10 @@ html[data-ui-theme] {
   --ink: #192838;
   --muted: #536576;
   --surface: #fff;
-  --surface-strong: #edf1f5;
-  --surface-alt: #f7f9fb;
-  --canvas: #f4f6f8;
-  --line: #d5dee7;
+  --surface-strong: #dce3ed;
+  --surface-alt: #e9edf4;
+  --canvas: #dfe5ed;
+  --line: #aab7c8;
   --accent: #820ad1;
   --on-accent: #fff;
   --accent-hover: #6808a7;
@@ -21,8 +21,8 @@ html[data-ui-theme="dark-premium"] {
   --ink: #eef4f8;
   --muted: #a9bbc9;
   --surface: #0d1b28;
-  --surface-strong: #162b3c;
-  --surface-alt: #102234;
+  --surface-strong: #294052;
+  --surface-alt: #192e40;
   --canvas: #07111b;
   --line: #304454;
   --accent: #820ad1;
@@ -166,3 +166,38 @@ html[data-ui-theme] body::before { display: none; }
   [data-ui-theme] .table-scroll { overflow-x: auto; }
 }
 @media print { [data-ui-theme] :is(.app-sidebar,.app-preferences) { display: none; } }
+
+/* Stable borders and shared row colors also apply when tables become mobile cards. */
+[data-ui-theme] :is(button,a,input,select,textarea,summary) { border: 1px solid transparent; }
+[data-ui-theme] :is(input,select,textarea) { border-color: var(--line); }
+[data-ui-theme] :is(button,a,input,select,textarea,summary):is(:hover,:focus-visible) { border-color: var(--accent); }
+[data-ui-theme] :is(.metric-card,.mini-task,.history-item,.pauta-premium-task-row) { border: 1px solid transparent; }
+[data-ui-theme] :is(.metric-card,.mini-task,.history-item,.pauta-premium-task-row):is(:hover,:focus-within) { border-color: var(--accent); }
+[data-ui-theme] table tbody tr { --row-surface: var(--surface); --row-outline: transparent; }
+[data-ui-theme] table tbody tr:nth-child(even) { --row-surface: var(--surface-alt); }
+[data-ui-theme] table tbody tr:is(:hover,:focus-within) { --row-outline: var(--accent); }
+[data-ui-theme] table tbody tr > td,
+[data-ui-theme] .task-table tr[class*="demand-priority-"] td:first-child,
+[data-ui-theme] .task-table tbody tr:hover td { background: var(--row-surface); }
+[data-ui-theme] table tbody tr > td { box-shadow: inset 0 1px var(--row-outline), inset 0 -1px var(--row-outline); }
+[data-ui-theme] table tbody tr > td:first-child { border-left: 1px solid var(--row-outline); }
+[data-ui-theme] table tbody tr > td:last-child { border-right: 1px solid var(--row-outline); }
+[data-ui-theme] :is(.history-item,.pauta-premium-task-row):nth-of-type(even) { background: var(--surface-alt); }
+[data-ui-theme] .preference-row { display: flex; align-items: center; flex-wrap: wrap; gap: .5rem; padding: .5rem 0; }
+[data-ui-theme] .app-preferences .browser-notification-settings { border: 0; border-top: 1px solid var(--line); border-radius: 0; margin: 0; background: transparent; }
+[data-ui-theme] .preference-row > .preference-actions { margin-left: auto; }
+[data-ui-theme] .preference-row > p[role] { flex-basis: 100%; margin: 0; }
+.help-tooltip { position: relative; display: inline-flex; }
+[data-ui-theme] .help-tooltip > button { display: grid; place-items: center; width: 44px; height: 44px; color: var(--link); background: transparent; border-radius: .5rem; }
+.help-tooltip [role="tooltip"] { position: absolute; z-index: 30; top: 100%; right: 0; width: min(17rem,65vw); padding: .75rem; border: 1px solid var(--line); border-radius: .5rem; color: var(--ink); background: var(--surface); box-shadow: 0 4px 18px #0003; font-size: .875rem; line-height: 1.5; }
+.history-filters { display: flex; flex-wrap: wrap; gap: .5rem; margin-block: .5rem; }
+.history-filters input { flex: 1; min-width: 8rem; }
+[data-ui-theme] .history-filters :is(input,select), [data-ui-theme] .history-item select { color: var(--ink); background: var(--surface-alt); padding: .5rem; border-radius: .5rem; }
+.history-item { display: flex; flex-wrap: wrap; align-items: center; gap: .75rem; padding: .75rem; border-radius: .5rem; }
+.history-item > div { flex: 1 1 14rem; min-width: 0; overflow-wrap: anywhere; }
+.history-item small { display: block; color: var(--muted); }
+.history-item > details { flex-basis: 100%; }
+.history-item ul { padding-left: 1.25rem; font-size: .875rem; }
+@media (max-width: 767px) {
+  .help-tooltip [role="tooltip"] { position: fixed; top: auto; bottom: 1rem; left: 50%; right: auto; transform: translateX(-50%); width: calc(100vw - 2rem); max-width: 24rem; }
+}

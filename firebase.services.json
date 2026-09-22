@@ -1,5 +1,8 @@
 {
-  "functions": [{ "source": "functions", "codebase": "pauta-services", "ignore": ["node_modules", ".env*", "*.log"] }],
+  "functions": [
+    { "source": "functions-core", "codebase": "pauta-core", "ignore": ["node_modules", ".env*", "*.log", "**/*.test.js"] },
+    { "source": "functions", "codebase": "pauta-services", "ignore": ["node_modules", ".env*", "*.log"] }
+  ],
   "firestore": { "rules": "firestore.rules" },
   "hosting": {
     "public": "dist",

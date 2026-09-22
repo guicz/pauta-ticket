@@ -1,5 +1,5 @@
-const CACHE = "pauta-shell-v3";
-const STATIC = ["/offline.html", "/manifest.webmanifest", "/icons/pauta-192.png", "/icons/pauta-512.png"];
+const CACHE = "pauta-shell-v4";
+const STATIC = ["/offline.html", "/manifest.webmanifest", "/fav-dash-gui.png"];
 
 function accountStore(mode, operation) {
   return new Promise((resolve, reject) => {
@@ -45,7 +45,7 @@ self.addEventListener("push", event => event.waitUntil((async () => {
   const uid = await accountStore("readonly", store => store.get("uid"));
   if (!uid || data.uid !== uid) return;
   await self.registration.showNotification(data.title || "Pauta Fluxo", {
-    body: data.body, tag: data.tag, icon: "/icons/pauta-192.png", badge: "/icons/pauta-192.png", lang: "pt-BR",
+    body: data.body, tag: data.tag, icon: "/fav-dash-gui.png", lang: "pt-BR",
     data: { taskId: data.taskId, uid },
   });
 })()));

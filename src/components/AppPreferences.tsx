@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import { Download, Settings } from "lucide-react";
+import { HelpTooltip } from "./HelpTooltip";
 import type { Person } from "../domain/models";
 import { BrowserNotificationSettings } from "./BrowserNotificationSettings";
 import { callService, servicesConfigured } from "../lib/integrations";
@@ -44,13 +45,13 @@ export function AppPreferences({ person, demo }: { person: Person; demo: boolean
   }
   return <details className="app-preferences">
     <summary><Settings size={18} /> Aplicativo e integrações</summary>
-    <section><strong>Instalar Pauta Fluxo</strong>
-      <p>{installed ? "O aplicativo está instalado neste dispositivo." : "Tenha um atalho na tela inicial e abra em uma janela própria."}</p>
-      {!installed && (install ? <button className="button secondary" onClick={async () => { await install.prompt(); await install.userChoice; setInstall(null); }}><Download size={17} /> Instalar aplicativo</button> : <p>No iPhone: Compartilhar → Adicionar à Tela de Início. No Android ou computador: menu do navegador → Instalar aplicativo.</p>)}
+    <section className="preference-row"><strong>Aplicativo</strong>
+      <HelpTooltip text="No iPhone: Compartilhar → Adicionar à Tela de Início. No Android ou computador: menu do navegador → Instalar aplicativo." />
+      {installed ? <span>Instalado</span> : install ? <button className="button secondary" onClick={async () => { await install.prompt(); await install.userChoice; setInstall(null); }}><Download size={17} /> Instalar</button> : <span>Pelo navegador</span>}
     </section>
     <BrowserNotificationSettings demo={demo} />
-    {person === "gui" && <section><strong>Google Calendar</strong><p>Suas tarefas agendadas aparecem na agenda Pauta Fluxo da conta Guilherme. Datas, horários e conclusão são atualizados automaticamente.</p>
-      {demo ? <p>Entre na sua conta para conectar o Google Calendar.</p> : !servicesConfigured || calendar?.configured === false ? <p>A integração está preparada e aguarda ativação do serviço e configuração da conexão Google.</p> : <div className="preference-actions"><button className="button secondary" onClick={connectCalendar} disabled={busy || !calendar}>{busy ? "Sincronizando…" : calendar?.connected ? "Sincronizar agora" : "Conectar Google Calendar"}</button>{calendar?.connected && <button className="button secondary" disabled={busy} onClick={async () => { setBusy(true); try { const { url } = await callService<{ url: string }>("calendarConnect"); if (new URL(url).origin === "https://accounts.google.com") window.location.assign(url); } catch { setMessage("Não foi possível reconectar."); } finally { setBusy(false); } }}>Reconectar conta</button>}</div>}
+    {person === "gui" && <section className="preference-row"><strong>Google Calendar</strong><HelpTooltip text="Quando conectado, sincroniza as tarefas agendadas do Guilherme. A ativação depende da configuração Google e do seu consentimento." />
+      {demo ? <span>Requer login</span> : !servicesConfigured || calendar?.configured === false ? <span>Não conectado</span> : <div className="preference-actions"><button className="button secondary" onClick={connectCalendar} disabled={busy || !calendar}>{busy ? "Sincronizando…" : calendar?.connected ? "Sincronizar" : "Conectar"}</button>{calendar?.connected && <button className="button secondary" disabled={busy} onClick={async () => { setBusy(true); try { const { url } = await callService<{ url: string }>("calendarConnect"); if (new URL(url).origin === "https://accounts.google.com") window.location.assign(url); } catch { setMessage("Não foi possível reconectar."); } finally { setBusy(false); } }}>Reconectar</button>}</div>}
       {calendar?.connected && <button className="button secondary" disabled={busy} onClick={async () => { setBusy(true); try { await callService("calendarDisconnect"); setCalendar(await callService<CalendarStatus>("calendarStatus")); setMessage("Sincronização desativada. Os eventos já criados foram preservados."); } catch { setMessage("Não foi possível desconectar agora."); } finally { setBusy(false); } }}>Desconectar Calendar</button>}
       {calendar?.lastSync && <p>Última sincronização: {new Date(calendar.lastSync).toLocaleString("pt-BR")}</p>}
       {calendar?.error && <p role="alert">{calendar.error}</p>}
