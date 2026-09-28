@@ -12,6 +12,7 @@ import {
   Plus,
   Save,
   Send,
+  Trash2,
   X,
 } from "lucide-react";
 import type { AppState, Priority, Shift, Task } from "../domain/models";
@@ -28,13 +29,15 @@ interface ManagerDashboardProps {
   onFinalizeTask: (taskId: string) => void;
   onReturnTask: (taskId: string, reason: string) => void;
   onForwardTask: (taskId: string) => void;
+  onUnblockTask: (taskId: string) => void;
+  onDeleteTask: (taskId: string) => void;
   onUpdateTask: (taskId: string, changes: Partial<Task>) => void;
   onChangeAssignee: (taskId: string, assignee: "pati" | "gui") => void;
 }
 
 const today = new Date().toISOString().slice(0, 10);
 
-export function ManagerDashboard({ state, queueOnly, onCreateTask, onPublishAgenda, onApproveTask, onFinalizeTask, onReturnTask, onForwardTask, onUpdateTask, onChangeAssignee }: ManagerDashboardProps) {
+export function ManagerDashboard({ state, queueOnly, onCreateTask, onPublishAgenda, onApproveTask, onFinalizeTask, onReturnTask, onForwardTask, onUnblockTask, onDeleteTask, onUpdateTask, onChangeAssignee }: ManagerDashboardProps) {
   const [creating, setCreating] = useState(false);
   const [clock, setClock] = useState(Date.now);
   useEffect(() => {
@@ -151,7 +154,7 @@ export function ManagerDashboard({ state, queueOnly, onCreateTask, onPublishAgen
                     </select>
                   </td>
                   <td data-label="Estado"><span className={`status status-${task.status}`}>{statusLabel(task.status)}</span>{overdueTask(task, state.events, clock) && <span className="overdue-badge" title="O horário previsto terminou e a demanda ainda não foi enviada para avaliação ou concluída.">Atrasada</span>}</td>
-                  <td>{task.status === "inbox" && <button className="button compact" onClick={() => onForwardTask(task.id)}>Encaminhar ao Gui</button>}{task.status === "in_review" && <button className="button compact" onClick={() => onApproveTask(task.id)}>Aprovar entrega</button>}{["ready", "active", "partial", "paused"].includes(task.status) && <button className="button primary compact" onClick={() => onFinalizeTask(task.id)}><CheckCircle2 size={15} /> Finalizar demanda</button>}{["in_review", "completed"].includes(task.status) && <button className="button secondary compact" onClick={() => { setReturning(task); setReason(""); }}>{task.status === "completed" ? "Reabrir demanda" : "Devolver para ajustes"}</button>}</td>
+                  <td className="task-actions-cell">{task.status === "inbox" && <button className="button compact" onClick={() => onForwardTask(task.id)}>Encaminhar ao Gui</button>}{task.status === "blocked" && <button className="button secondary compact" onClick={() => onUnblockTask(task.id)}>Liberar bloqueio</button>}{task.status === "in_review" && <button className="button compact" onClick={() => onApproveTask(task.id)}>Aprovar entrega</button>}{["ready", "active", "partial", "paused"].includes(task.status) && <button className="button primary compact" onClick={() => onFinalizeTask(task.id)}><CheckCircle2 size={15} /> Finalizar demanda</button>}{["in_review", "completed"].includes(task.status) && <button className="button secondary compact" onClick={() => { setReturning(task); setReason(""); }}>{task.status === "completed" ? "Reabrir demanda" : "Devolver para ajustes"}</button>}<button className="button danger compact" onClick={() => onDeleteTask(task.id)}><Trash2 size={15} /> Excluir demanda</button></td>
                 </tr>
               ))}
               {visibleTasks.length === 0 && <tr><td colSpan={7} className="empty-cell">Nenhuma demanda neste filtro.</td></tr>}
@@ -162,7 +165,7 @@ export function ManagerDashboard({ state, queueOnly, onCreateTask, onPublishAgen
 
       {creating && <CreateTaskDialog onClose={() => setCreating(false)} onCreate={onCreateTask} />}
       {scheduling && <ScheduleDialog task={scheduling} onClose={() => setScheduling(null)} onSave={(changes) => { onUpdateTask(scheduling.id, changes); setScheduling(null); }} />}
-      {selectedTask && <TaskDetailsDialog task={selectedTask} onChangeAssignee={assignee => onChangeAssignee(selectedTask.id, assignee)} onClose={() => setSelectedTask(null)} onApprove={() => { onApproveTask(selectedTask.id); setSelectedTask(null); }} onFinalize={() => { onFinalizeTask(selectedTask.id); setSelectedTask(null); }} onReturn={() => { setReturning(selectedTask); setReason(""); setSelectedTask(null); }} onForward={() => { onForwardTask(selectedTask.id); setSelectedTask(null); }} />}
+      {selectedTask && <TaskDetailsDialog task={selectedTask} onChangeAssignee={assignee => onChangeAssignee(selectedTask.id, assignee)} onClose={() => setSelectedTask(null)} onApprove={() => { onApproveTask(selectedTask.id); setSelectedTask(null); }} onFinalize={() => { onFinalizeTask(selectedTask.id); setSelectedTask(null); }} onReturn={() => { setReturning(selectedTask); setReason(""); setSelectedTask(null); }} onForward={() => { onForwardTask(selectedTask.id); setSelectedTask(null); }} onUnblock={() => { onUnblockTask(selectedTask.id); setSelectedTask(null); }} />}
       {returning && <div className="dialog-backdrop"><dialog open className="small-dialog" aria-labelledby="return-title"><header><h2 id="return-title">Devolver para ajustes</h2><button className="text-close" onClick={() => setReturning(null)}>Cancelar</button></header><form className="small-dialog-body" onSubmit={(event) => { event.preventDefault(); if (!reason.trim()) return; onReturnTask(returning.id, reason.trim()); setReturning(null); }}><p>{returning.title}</p><label className="field">O que precisa ser corrigido?<textarea autoFocus required value={reason} onChange={(event) => setReason(event.target.value)} rows={4} /></label><p>O progresso e a prova serão preservados. O ajuste entrará como uma nova etapa.</p><button className="button primary" disabled={!reason.trim()}>Devolver demanda</button></form></dialog></div>}
     </div>
   );
@@ -221,7 +224,7 @@ function ScheduleDialog({ task, onClose, onSave }: { task: Task; onClose: () => 
   </dialog></div>;
 }
 
-function TaskDetailsDialog({ task, onClose, onApprove, onFinalize, onReturn, onForward, onChangeAssignee }: { task: Task; onClose: () => void; onApprove: () => void; onFinalize: () => void; onReturn: () => void; onForward: () => void; onChangeAssignee: (assignee: "pati" | "gui") => void }) {
+function TaskDetailsDialog({ task, onClose, onApprove, onFinalize, onReturn, onForward, onUnblock, onChangeAssignee }: { task: Task; onClose: () => void; onApprove: () => void; onFinalize: () => void; onReturn: () => void; onForward: () => void; onUnblock: () => void; onChangeAssignee: (assignee: "pati" | "gui") => void }) {
   const completedSteps = task.steps.filter((step) => step.done).length;
   const hasProof = Boolean(task.evidence || task.evidenceAttachment);
   const canFinalize = ["ready", "active", "partial", "paused"].includes(task.status);
@@ -229,11 +232,12 @@ function TaskDetailsDialog({ task, onClose, onApprove, onFinalize, onReturn, onF
     <header className="task-details-header"><div><span className="eyebrow">DETALHES DA DEMANDA</span><h2 id="task-details-title">{task.title}</h2><p>{task.client} · {task.project}</p></div><div className="task-details-header-actions"><span className={`status status-${task.status}`}>{statusLabel(task.status)}</span><button className="text-close" onClick={onClose} aria-label="Fechar"><X size={20} /></button></div></header>
     <div className="task-details-body">
       {task.status !== "completed" && <label className="field">Alterar responsável<select value={task.assignee} onChange={event => onChangeAssignee(event.target.value as "pati" | "gui")}><option value="pati">Pati (eu)</option><option value="gui">Gui</option></select></label>}
+      {task.status === "blocked" && <section className="task-details-section blocked-notice"><h3>Motivo do bloqueio</h3><p>{task.blocker || "Nenhum motivo foi registrado."}</p><small>Ao liberar, a demanda volta para a fila e o motivo fica salvo no histórico.</small></section>}
       <div className="task-details-meta"><div><span>Solicitado por</span><strong>{requesterLabel(task)}</strong>{task.requesterEmail && <small>{task.requesterEmail}</small>}</div><div><span>Responsável</span><strong>{task.assignee === "gui" ? "Gui" : "Pati"}</strong></div><div><span>Prioridade</span><strong className={`detail-priority priority-${task.priority}`}>{priorityLabel(task.priority)}</strong></div><div><span>Estimativa</span><strong>{formatMinutes(task.executorEstimateMinutes ?? task.estimatedMinutes)}</strong></div><div><span>Agenda</span><strong>{scheduleTimeLabel(task)} · {scheduleMetaLabel(task)}</strong></div></div>
       <section className="task-details-section"><div className="task-details-section-title"><h3>O que precisa ser entregue</h3><span>{completedSteps} de {task.steps.length} etapas</span></div><p>{task.expectedResult}</p><div className="task-details-condition"><span>CRITÉRIO DE PRONTO</span><strong>{task.doneCondition}</strong></div></section>
       {task.steps.length > 0 && <section className="task-details-section"><h3>Etapas realizadas</h3><div className="detail-step-list">{task.steps.map((step) => <div key={step.id} className={step.done ? "done" : ""}><span>{step.done ? "✓" : "·"}</span><p>{step.label}</p></div>)}</div></section>}
       <section className={`task-details-section proof-section ${hasProof ? "has-proof" : "missing-proof"}`}><div className="task-details-section-title"><h3>Prova da entrega</h3><span>{hasProof ? "Disponível" : "Ainda não enviada"}</span></div>{task.evidence && <p className="proof-copy">{task.evidence}</p>}{task.evidenceAttachment ? <a className="proof-image-link" href={task.evidenceAttachment.dataUrl} target="_blank" rel="noreferrer"><img src={task.evidenceAttachment.dataUrl} alt={`Print de prova da demanda ${task.title}`} /><span>Abrir print em tamanho maior</span></a> : <p className="proof-empty">Quando o Gui enviar um print ou descrição, a prova aparecerá aqui para você conferir antes de aprovar.</p>}</section>
-      <div className="task-details-actions">{task.status === "inbox" && <button className="button primary" onClick={onForward}>Encaminhar ao Gui</button>}{task.status === "in_review" && <><button className="button secondary" onClick={onReturn}>Devolver para ajustes</button><button className="button primary" onClick={onApprove}><CheckCircle2 size={17} /> Aprovar entrega</button></>}{canFinalize && <button className="button primary" onClick={onFinalize}><CheckCircle2 size={17} /> Finalizar demanda</button>}{task.status === "completed" && <button className="button secondary" onClick={onReturn}>Reabrir demanda</button>}</div>
+      <div className="task-details-actions">{task.status === "inbox" && <button className="button primary" onClick={onForward}>Encaminhar ao Gui</button>}{task.status === "blocked" && <button className="button primary" onClick={onUnblock}>Liberar bloqueio e voltar à fila</button>}{task.status === "in_review" && <><button className="button secondary" onClick={onReturn}>Devolver para ajustes</button><button className="button primary" onClick={onApprove}><CheckCircle2 size={17} /> Aprovar entrega</button></>}{canFinalize && <button className="button primary" onClick={onFinalize}><CheckCircle2 size={17} /> Finalizar demanda</button>}{task.status === "completed" && <button className="button secondary" onClick={onReturn}>Reabrir demanda</button>}</div>
     </div>
   </dialog></div>;
 }

@@ -32,6 +32,10 @@ export interface EvidenceAttachment {
 
 export interface Task {
   history?: { status: TaskStatus; priority: Priority; actor: Person; at: string }[];
+  activity?: ActivityEvent[];
+  archivedAt?: string;
+  archivedStatus?: TaskStatus;
+  archivedBy?: Person;
   recurrence?: "none" | "daily" | "weekly" | "monthly";
   recurrenceParentId?: string;
   id: string;
@@ -83,8 +87,10 @@ export interface ActivityEvent {
     | "memory_captured"
     | "task_interrupted"
     | "task_blocked"
+    | "task_unblocked"
     | "sent_to_review"
-    | "task_completed";
+    | "task_completed"
+    | "task_archived";
   description: string;
   createdAt: string;
 }

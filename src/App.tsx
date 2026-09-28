@@ -32,6 +32,10 @@ function viewForPerson(person: Person, view: AppView): AppView {
   return ["overview", "queue", "report", "daily"].includes(view) ? view : "overview";
 }
 
+function uniqueTasksById(tasks: Task[]): Task[] {
+  return [...new Map(tasks.map(task => [task.id, task])).values()];
+}
+
 export function App() {
   const [state, setState] = useState<AppState>(() => loadState());
   const [demoPerson, setDemoPerson] = useState<Person>("pati");
@@ -47,6 +51,7 @@ export function App() {
   const [serviceMessage, setServiceMessage] = useState("");
   const [online, setOnline] = useState(navigator.onLine);
   const [ownRequests, setOwnRequests] = useState<Task[]>([]);
+  const [teamRequests, setTeamRequests] = useState<Task[]>([]);
   const [themes, setThemes] = useState<Record<string, GuiTheme>>(() => {
     try {
       const saved = JSON.parse(window.localStorage.getItem(GUI_THEME_STORAGE_KEY) ?? "{}");
@@ -83,6 +88,7 @@ export function App() {
 
   useEffect(() => {
     setOwnRequests([]);
+    setTeamRequests([]);
     if (demoMode || person !== "atendimento" || !user) return;
     return subscribeToOwnRequests(user.uid, setOwnRequests, () => setServiceMessage("Não foi possível carregar o histórico."));
   }, [user?.uid, person, demoMode]);
@@ -149,11 +155,16 @@ export function App() {
     );
     const requestsUnsubscribe = person === "pati"
       ? subscribeToDemandRequests((requests) => {
-          demandRequestsRef.current = requests;
+          setTeamRequests(requests);
+          const activeRequests = requests.filter(task => !task.archivedAt);
+          demandRequestsRef.current = activeRequests;
           setState((current) => {
-            const known = new Set(current.tasks.map((task) => task.id));
-            const newRequests = requests.filter((task) => !known.has(task.id));
-            return newRequests.length ? { ...current, tasks: [...current.tasks, ...newRequests] } : current;
+            const activeTasks = current.tasks.filter(task => !task.archivedAt);
+            const known = new Set(activeTasks.map((task) => task.id));
+            const newRequests = activeRequests.filter((task) => !known.has(task.id));
+            return activeTasks.length !== current.tasks.length || newRequests.length
+              ? { ...current, tasks: [...activeTasks, ...newRequests] }
+              : current;
           });
         }, () => setSyncLabel("Falha ao carregar solicitações"))
       : () => undefined;
@@ -245,6 +256,18 @@ export function App() {
     }));
   }
 
+  function deleteTask(taskId: string) {
+    if (person !== "pati") return;
+    const task = state.tasks.find(item => item.id === taskId);
+    if (!task || !window.confirm(`Retirar “${task.title}” da pauta? Ela continuará salva no histórico das solicitantes como arquivada.`)) return;
+    setState(current => ({
+      ...current,
+      tasks: current.tasks.filter(item => item.id !== taskId),
+      events: current.events.filter(event => event.taskId !== taskId),
+      notifications: current.notifications.filter(notification => notification.taskId !== taskId),
+    }));
+  }
+
   function forwardTask(taskId: string) {
     const now = new Date().toISOString();
     setState((current) => {
@@ -254,7 +277,7 @@ export function App() {
       return {
         ...current,
         tasks: current.tasks.map((task) => task.id === taskId ? forwarded : task),
-        events: [appendEvent({ actor: "pati", kind: "task_created", taskId, description: `Solicitação encaminhada ao Gui: ${target.title}.` }), ...current.events],
+        events: [appendEvent({ actor: "pati", kind: "task_reassigned", taskId, description: `Demanda encaminhada ao Gui: ${target.title}. A descrição completa e os critérios foram mantidos na pauta dele.` }), ...current.events],
         notifications: [appendNotification({ taskId, recipient: "gui", level: "normal", title: "Nova tarefa na sua fila", message: `${target.title} foi organizada pela Pati e está pronta para entrar na pauta.` }), ...current.notifications],
       };
     });
@@ -310,23 +333,28 @@ export function App() {
   }
 
   function toggleStep(taskId: string, stepId: string) {
-    setState((current) => ({
-      ...current,
-      tasks: current.tasks.map((task) => {
-        if (task.id !== taskId) return task;
-        const steps = task.steps.map((step) => step.id === stepId ? { ...step, done: !step.done } : step);
-        const nextStep = steps.find((step) => !step.done);
-        const lastCompleted = [...steps].reverse().find((step) => step.done);
-        const returnPoint = nextStep
-          ? `${lastCompleted ? `Você concluiu “${lastCompleted.label}”. ` : ""}Retome em “${nextStep.label}”.`
-          : "Etapas concluídas. Anexe a prova e envie para validação.";
-        return { ...task, steps, returnPoint, status: task.status === "ready" ? "partial" : task.status, updatedAt: new Date().toISOString() };
-      }),
-      events: [
-        appendEvent({ actor: "gui", kind: "progress_recorded", taskId, description: "Progresso da tarefa atualizado." }),
-        ...current.events,
-      ],
-    }));
+    setState((current) => {
+      const task = current.tasks.find(item => item.id === taskId);
+      const step = task?.steps.find(item => item.id === stepId);
+      const nextDone = step ? !step.done : false;
+      return {
+        ...current,
+        tasks: current.tasks.map((item) => {
+          if (item.id !== taskId) return item;
+          const steps = item.steps.map((itemStep) => itemStep.id === stepId ? { ...itemStep, done: !itemStep.done } : itemStep);
+          const nextStep = steps.find((itemStep) => !itemStep.done);
+          const lastCompleted = [...steps].reverse().find((itemStep) => itemStep.done);
+          const returnPoint = nextStep
+            ? `${lastCompleted ? `Você concluiu “${lastCompleted.label}”. ` : ""}Retome em “${nextStep.label}”.`
+            : "Etapas concluídas. Anexe a prova e envie para validação.";
+          return { ...item, steps, returnPoint, status: item.status === "ready" ? "partial" : item.status, updatedAt: new Date().toISOString() };
+        }),
+        events: [
+          appendEvent({ actor: "gui", kind: "progress_recorded", taskId, description: step ? `Gui ${nextDone ? "concluiu" : "reabriu"} a etapa: ${step.label}.` : "Gui atualizou o progresso da tarefa." }),
+          ...current.events,
+        ],
+      };
+    });
   }
 
   function captureMemory(taskId: string, text: string) {
@@ -341,7 +369,7 @@ export function App() {
           }
         : task),
       events: [
-        appendEvent({ actor: "gui", kind: "memory_captured", taskId, description: "Lembrete guardado sem interromper a tarefa." }),
+        appendEvent({ actor: "gui", kind: "memory_captured", taskId, description: `Gui adicionou um retorno para consulta: ${text}` }),
         ...current.events,
       ],
     }));
@@ -354,7 +382,7 @@ export function App() {
         ? { ...task, returnPoint, updatedAt: new Date().toISOString() }
         : task),
       events: [
-        appendEvent({ actor: "gui", kind: "progress_recorded", taskId, description: "Ponto de retomada atualizado." }),
+        appendEvent({ actor: "gui", kind: "progress_recorded", taskId, description: `Gui atualizou o ponto de retomada: ${returnPoint}` }),
         ...current.events,
       ],
     }));
@@ -367,7 +395,7 @@ export function App() {
         ? { ...task, evidence, ...(evidenceAttachment ? { evidenceAttachment } : {}), updatedAt: new Date().toISOString() }
         : task),
       events: [
-        appendEvent({ actor: "gui", kind: "progress_recorded", taskId, description: "Evidência preparada para envio." }),
+        appendEvent({ actor: "gui", kind: "progress_recorded", taskId, description: `Gui atualizou a evidência: ${evidence}` }),
         ...current.events,
       ],
     }));
@@ -393,11 +421,31 @@ export function App() {
     }));
   }
 
+  function unblockTask(taskId: string) {
+    if (person !== "pati") return;
+    const now = new Date().toISOString();
+    setState((current) => {
+      const target = current.tasks.find((task) => task.id === taskId);
+      if (!target || target.status !== "blocked") return current;
+      const { blocker: _blocker, ...taskWithoutBlocker } = target;
+      return {
+        ...current,
+        tasks: current.tasks.map((task) => task.id === taskId
+          ? { ...taskWithoutBlocker, status: "ready" as const, updatedAt: now }
+          : task),
+        events: [appendEvent({ actor: "pati", assignee: target.assignee, kind: "task_unblocked", taskId, description: `Bloqueio removido pela Pati${target.blocker ? ` (motivo anterior: ${target.blocker})` : ""}. Demanda liberada para a fila.` }), ...current.events],
+        notifications: target.assignee === "gui"
+          ? [appendNotification({ taskId, recipient: "gui", level: "normal", title: "Demanda liberada", message: `${target.title} foi liberada pela Pati e voltou para sua fila.` }), ...current.notifications]
+          : current.notifications,
+      };
+    });
+  }
+
   function submitForReview(taskId: string, evidence: string, evidenceAttachment?: EvidenceAttachment) {
     setState((current) => ({
       ...current,
       tasks: current.tasks.map((task) => task.id === taskId ? { ...task, status: "in_review", evidence, ...(evidenceAttachment ? { evidenceAttachment } : {}), updatedAt: new Date().toISOString() } : task),
-      events: [appendEvent({ actor: "gui", kind: "sent_to_review", taskId, description: "Tarefa enviada para validação." }), ...current.events],
+      events: [appendEvent({ actor: "gui", kind: "sent_to_review", taskId, description: `Gui enviou a tarefa para validação. Retorno: ${evidence}` }), ...current.events],
       notifications: [appendNotification({ taskId, recipient: "pati", level: "normal", title: "Entrega para validar", message: "Gui enviou uma tarefa com evidência." }), ...current.notifications],
     }));
   }
@@ -517,6 +565,8 @@ export function App() {
             onFinalizeTask={finalizeTask}
             onReturnTask={returnTask}
             onForwardTask={forwardTask}
+            onUnblockTask={unblockTask}
+            onDeleteTask={deleteTask}
             onUpdateTask={updateTask}
             onChangeAssignee={changeAssignee}
           />
@@ -542,7 +592,7 @@ export function App() {
           />
         )}
         </div>
-        <RequestHistory tasks={person === "atendimento" ? demoMode ? state.tasks.filter(task => task.requester === "atendimento") : ownRequests : (demoMode || cloudReady) ? state.tasks.filter(task => person === "pati" || task.assignee === "gui" || task.requesterUid === user?.uid) : []} events={person === "atendimento" ? [] : state.events} manager={person === "pati"} onPriority={(taskId, priority) => updateTask(taskId, { priority })} />
+        <RequestHistory tasks={person === "atendimento" ? demoMode ? state.tasks.filter(task => task.requester === "atendimento") : ownRequests : (demoMode || cloudReady) ? person === "pati" ? uniqueTasksById([...state.tasks, ...teamRequests]) : state.tasks.filter(task => task.assignee === "gui" || task.requesterUid === user?.uid) : []} events={person === "atendimento" ? [] : state.events} manager={person === "pati"} onPriority={(taskId, priority) => updateTask(taskId, { priority })} />
         <AppPreferences key={demoMode ? `demo:${person}` : user?.uid} person={person} demo={demoMode} />
       </main>
 

@@ -13,6 +13,6 @@ export function weeklySnapshot(state: AppState, reference = new Date()) {
     ["active", "partial", "paused", "blocked", "in_review"].includes(task.status)
     && task.steps.some((step) => step.done)
     && events.some((event) => event.taskId === task.id && event.kind === "progress_recorded"));
-  const management = events.filter((event) => event.actor === "pati" && ["task_created", "agenda_published", "estimate_changed", "priority_changed", "task_interrupted", "task_blocked", "task_completed"].includes(event.kind));
+  const management = events.filter((event) => event.actor === "pati" && ["task_created", "agenda_published", "estimate_changed", "priority_changed", "task_interrupted", "task_blocked", "task_unblocked", "task_completed"].includes(event.kind));
   return { start, end, completed, partial, management };
 }

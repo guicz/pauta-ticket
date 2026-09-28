@@ -24,4 +24,11 @@ describe("weeklySnapshot", () => {
     const state: AppState = { ...base, tasks: [partial], events: [{ id: "event", actor: "gui", taskId: "partial", kind: "progress_recorded", description: "Avanço", createdAt: "2026-09-07T12:00:00" }] };
     expect(weeklySnapshot(state, new Date("2026-09-07T12:00:00")).partial).toHaveLength(1);
   });
+
+  it("counts releasing a blocked task as Pati's management, not as delivery", () => {
+    const release = { id: "release", taskId: "blocked", actor: "pati" as const, kind: "task_unblocked" as const, description: "Liberou a demanda para a fila.", createdAt: "2026-09-08T12:00:00" };
+    const result = weeklySnapshot({ ...base, events: [release] }, new Date("2026-09-08T12:00:00"));
+    expect(result.management).toEqual([release]);
+    expect(result.completed).toHaveLength(0);
+  });
 });

@@ -14,3 +14,8 @@ test('Gui keeps existing execution actions but cannot substitute tasks', () => {
   assert.throws(() => validateWorkspaceWrite('gui', state, { ...state, tasks: [{ ...state.tasks[0], id: 'b' }] }));
   assert.throws(() => validateWorkspaceWrite('pati', state, { ...state, tasks: [state.tasks[0], state.tasks[0]] }));
 });
+test('only Pati can remove a demand from the shared workspace', () => {
+  const deleted = { ...state, tasks: [] };
+  assert.doesNotThrow(() => validateWorkspaceWrite('pati', state, deleted));
+  assert.throws(() => validateWorkspaceWrite('gui', state, deleted));
+});

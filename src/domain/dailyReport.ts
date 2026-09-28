@@ -25,7 +25,7 @@ export function dailyReport(state: AppState, date: string, reference = new Date(
     .map(event => `${person(event.actor)} · ${taskLabel(event.taskId)} — ${event.description}`);
   const review = events.filter(event => event.kind === "sent_to_review" && event.actor === "gui").map(event => `${taskLabel(event.taskId)} — executada e enviada por Gui para avaliação; não significa aprovação da Pati.`);
   const blockers = events.filter(event => ["task_blocked", "task_interrupted"].includes(event.kind)).map(event => `${taskLabel(event.taskId)} — ${event.description}`);
-  const management = events.filter(event => event.actor === "pati" && (["task_created", "task_reassigned", "agenda_published", "priority_changed", "estimate_changed", "task_interrupted"].includes(event.kind) || (event.kind === "task_completed" && owner(event) !== "pati")))
+  const management = events.filter(event => event.actor === "pati" && (["task_created", "task_reassigned", "agenda_published", "priority_changed", "estimate_changed", "task_interrupted", "task_unblocked"].includes(event.kind) || (event.kind === "task_completed" && owner(event) !== "pati")))
     .map(event => `${event.taskId ? `${taskLabel(event.taskId)} — ` : ""}${event.kind === "task_completed" ? "Conferência/encerramento pela Pati (não é execução da tarefa)." : event.description}`);
   const cutoff = Math.min(reference.getTime(), start + 86_400_000 - 1);
   const history = state.events.filter(event => Date.parse(event.createdAt) <= cutoff);

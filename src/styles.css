@@ -105,6 +105,8 @@ h1, h2, h3 { font-family: inherit; }
 .button.primary:hover { background: #0d332e; }
 .button.secondary { border-color: rgba(255,255,255,.78); color: #35443f; background: rgba(255,255,255,.62); backdrop-filter: blur(1rem); }
 .button.secondary:hover { background: #f7f9f7; }
+.button.danger { border-color: rgba(168, 62, 72, 0.18); color: var(--danger); background: rgba(255, 241, 242, 0.82); }
+.button.danger:hover { background: #fbe5e7; }
 .button.compact { min-height: 2rem; padding: 0.35rem 0.65rem; }
 .button.large { min-height: 3rem; padding-inline: 1.4rem; }
 .button.full { width: 100%; }
@@ -159,6 +161,8 @@ h1, h2, h3 { font-family: inherit; }
 .task-table td:first-child { min-width: 15rem; }
 .task-table td strong, .task-table td small { display: block; }
 .task-table td small { margin-top: 0.2rem; color: var(--muted); font-size: 0.875rem; }
+.task-actions-cell { display: flex; min-width: 10rem; flex-direction: column; align-items: flex-start; gap: 0.4rem; }
+.task-actions-cell .button { white-space: nowrap; }
 .avatar { width: 1.7rem; height: 1.7rem; display: inline-grid; place-items: center; margin-right: 0.45rem; border-radius: 50%; font-size: 0.875rem; font-weight: 850; }
 .avatar-gui { color: #234e74; background: #dfeaf4; }
 .avatar-pati { color: #7d4d15; background: #f7e8cb; }
@@ -168,6 +172,7 @@ h1, h2, h3 { font-family: inherit; }
 .status { display: inline-flex; align-items: center; min-height: 1.55rem; padding: 0.2rem 0.5rem; border-radius: 2rem; color: #51605c; background: #edf1ef; font-size: 0.875rem; font-weight: 750; white-space: nowrap; }
 .status-active { color: #16604f; background: #def2e9; }
 .status-blocked { color: #923846; background: #fae7e9; }
+.blocked-notice { border-color: #efc5cb; background: #fff5f6; }
 .status-in_review { color: #825410; background: #fbefd6; }
 .empty-cell { padding: 2rem !important; color: var(--muted); text-align: center; }
 

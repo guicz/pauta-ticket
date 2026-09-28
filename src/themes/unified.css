@@ -198,6 +198,9 @@ html[data-ui-theme] body::before { display: none; }
 .history-item small { display: block; color: var(--muted); }
 .history-item > details { flex-basis: 100%; }
 .history-item ul { padding-left: 1.25rem; font-size: .875rem; }
+.request-history-description { margin-block: .75rem; padding: .75rem 1rem; border-left: 3px solid var(--accent); background: var(--surface-alt); }
+.request-history-description h3, .history-item details > h3 { margin: .25rem 0 .5rem; font-size: .95rem; }
+.request-history-description p { margin: .35rem 0; overflow-wrap: anywhere; }
 @media (max-width: 767px) {
   .help-tooltip [role="tooltip"] { position: fixed; top: auto; bottom: 1rem; left: 50%; right: auto; transform: translateX(-50%); width: calc(100vw - 2rem); max-width: 24rem; }
 }

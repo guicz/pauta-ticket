@@ -49,3 +49,15 @@ it("includes carried-over overdue work and its management without inventing an e
   }
   expect(dailyReport(state, "2026-09-15", new Date("2026-09-15T12:29:00Z"))).not.toContain("prazo vencido:");
 });
+
+it("records Pati's release of a blocked task as management, not as delivery", () => {
+  const task = { ...seedState.tasks[0], id: "blocked-task", title: "ADS DG5i", assignee: "gui" as const, status: "ready" as const };
+  const text = dailyReport({ ...seedState, tasks: [task], events: [{
+    id: "unblocked", taskId: task.id, actor: "pati", assignee: "gui", kind: "task_unblocked",
+    description: "Bloqueio removido pela Pati (motivo anterior: correções). Demanda liberada para a fila.",
+    createdAt: "2026-09-16T15:00:00Z",
+  }] }, "2026-09-16");
+  expect(text).toContain("GESTÃO E ORGANIZAÇÃO DA PAUTA — PATI");
+  expect(text).toContain("Bloqueio removido pela Pati (motivo anterior: correções)");
+  expect(text).toContain("TAREFAS EXECUTADAS POR PATI — ENTREGAS NO DIA\n• Nenhum registro.");
+});
