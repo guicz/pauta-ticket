@@ -3,33 +3,25 @@ import {
   AlertCircle,
   ArrowRight,
   Bell,
-  Brain,
   CalendarDays,
   Check,
   CheckCircle2,
   ChevronRight,
-  Clock3,
-  ExternalLink,
   FileCheck2,
-  FileText,
-  FolderKanban,
   Inbox,
   ImagePlus,
   Lightbulb,
   Link2,
   ListChecks,
   MoreHorizontal,
-  Network,
   NotebookPen,
-  Pause,
-  PauseCircle,
   Play,
   Plus,
-  RadioTower,
   RotateCcw,
   Save,
   Send,
   Search,
+  ThumbsUp,
   Sparkles,
   Sun,
   Target,
@@ -251,14 +243,6 @@ function GuiPremiumFocus({ state, active, highlighted, next, unread, completedSt
   );
 }
 
-type MapNodeId = "memory" | "goal" | "project" | "routine" | "evidence" | "captures";
-
-const demoResources = [
-  { id: "briefing", name: "Briefing da campanha", kind: "Documento", updated: "Hoje, 8h12", description: "Objetivo: gerar pedidos de orçamento na região de Santa Maria. Público principal: pessoas de 28 a 55 anos." },
-  { id: "references", name: "Referências aprovadas", kind: "Pasta", updated: "Ontem, 17h40", description: "Três anúncios aprovados pela cliente, paleta verde e fotos da unidade Centro." },
-  { id: "history", name: "Decisões do cliente", kind: "Memória", updated: "2 dias atrás", description: "Evitar desconto na chamada. Priorizar avaliação inicial e atendimento individual." },
-];
-
 interface BrainMapDialogProps {
   task: Task;
   returnPoint: string;
@@ -270,30 +254,13 @@ interface BrainMapDialogProps {
 }
 
 function BrainMapDialog({ task, returnPoint, onToggleStep, onCaptureMemory, onUpdateReturnPoint, onSaveEvidence, onClose }: BrainMapDialogProps) {
-  const [selectedId, setSelectedId] = useState<MapNodeId>("memory");
-  const [motionPaused, setMotionPaused] = useState(false);
   const [returnDraft, setReturnDraft] = useState(returnPoint);
-  const [evidenceDraft, setEvidenceDraft] = useState(task.evidence ?? "Captura da campanha salva em /Viva Serra/Revisão");
-  const [captureDraft, setCaptureDraft] = useState("Confirmar orçamento diário com a Pati");
-  const [goalExpanded, setGoalExpanded] = useState(false);
-  const [selectedResourceId, setSelectedResourceId] = useState(demoResources[0].id);
+  const [evidenceDraft, setEvidenceDraft] = useState(task.evidence ?? "");
+  const [captureDraft, setCaptureDraft] = useState("");
   const [feedback, setFeedback] = useState("");
   const completedSteps = task.steps.filter((step) => step.done).length;
   const nextStep = task.steps.find((step) => !step.done);
-  const notes = task.memoryNotes?.length ? task.memoryNotes : [
-    { id: "demo-note-1", text: "Usar a segmentação de 15 km aprovada na última reunião.", createdAt: new Date().toISOString() },
-    { id: "demo-note-2", text: "Conferir se o botão leva para o WhatsApp correto.", createdAt: new Date().toISOString() },
-  ];
-  const selectedResource = demoResources.find((resource) => resource.id === selectedResourceId) ?? demoResources[0];
-  const nodes: Array<{ id: MapNodeId; label: string; title: string; detail: string; icon: React.ReactNode }> = [
-    { id: "memory", label: "Memória", title: "Ponto de retomada", detail: returnPoint, icon: <RotateCcw size={17} /> },
-    { id: "goal", label: "Objetivo", title: "Resultado esperado", detail: task.expectedResult, icon: <Target size={17} /> },
-    { id: "project", label: "Projeto", title: task.project, detail: `${task.client} · ${task.priority === "urgent" ? "Prioridade urgente" : task.priority === "high" ? "Prioridade alta" : "Prioridade normal"}`, icon: <FolderKanban size={17} /> },
-    { id: "routine", label: "Rotina", title: `${completedSteps} de ${task.steps.length} etapas`, detail: nextStep ? `Próxima ação: ${nextStep.label}` : "Etapas concluídas. Envie a prova para validação.", icon: <ListChecks size={17} /> },
-    { id: "evidence", label: "Evidência", title: task.evidence ? "Prova registrada" : "Prova ainda pendente", detail: task.evidence ?? task.doneCondition, icon: <FileCheck2 size={17} /> },
-    { id: "captures", label: "Capturas", title: `${notes.length} ${notes.length === 1 ? "lembrete guardado" : "lembretes guardados"}`, detail: notes[0]?.text ?? "Nenhum pensamento capturado nesta tarefa.", icon: <NotebookPen size={17} /> },
-  ];
-  const selected = nodes.find((node) => node.id === selectedId) ?? nodes[0];
+  const notes = task.memoryNotes ?? [];
 
   useEffect(() => {
     function handleKeyDown(event: KeyboardEvent) {
@@ -334,117 +301,57 @@ function BrainMapDialog({ task, returnPoint, onToggleStep, onCaptureMemory, onUp
     <div className="brain-map-backdrop" role="presentation" onMouseDown={(event) => event.target === event.currentTarget && onClose()}>
       <dialog open className="brain-map-dialog" aria-labelledby="map-title">
         <header className="map-dialog-head">
-          <div><span className="eyebrow">VISÃO ADICIONAL</span><h2 id="map-title">Mapa da tarefa</h2><p>Uma leitura visual do que sustenta seu trabalho agora.</p></div>
-          <div className="map-head-actions">
-            <button className="motion-toggle" onClick={() => setMotionPaused((paused) => !paused)} aria-label={motionPaused ? "Retomar movimento" : "Pausar movimento"}>{motionPaused ? <Play size={17} /> : <Pause size={17} />}<span>{motionPaused ? "Animar" : "Pausar"}</span></button>
-            <button className="map-close" onClick={onClose} aria-label="Fechar mapa"><X size={20} /></button>
-          </div>
+          <div><span className="eyebrow">VISÃO DA TAREFA</span><h2 id="map-title">Roteiro da tarefa</h2><p>Microtarefas na ordem de execução, com o progresso de cada uma.</p></div>
+          <button className="map-close" onClick={onClose} aria-label="Fechar roteiro"><X size={20} /></button>
         </header>
 
         <div className="brain-map-body">
-          <section className={`map-stage ${motionPaused ? "motion-paused" : ""}`} aria-label="Relações da tarefa atual">
-            <div className="map-aura map-aura-one" />
-            <div className="map-aura map-aura-two" />
-            <div className="map-live-status"><RadioTower size={14} /><span>{motionPaused ? "Movimento pausado" : "Mapa vivo"}</span></div>
-            <div className="map-particles" aria-hidden="true">{Array.from({ length: 14 }, (_, index) => <i key={index} style={{ "--particle-angle": `${index * 25.7}deg`, "--particle-radius": `${8 + index * .35}rem`, "--particle-duration": `${19 + index * .7}s`, "--particle-delay": `${index * -1.1}s` } as React.CSSProperties} />)}</div>
-            <svg className="map-links" viewBox="0 0 600 520" preserveAspectRatio="none" aria-hidden="true">
-              <circle cx="300" cy="260" r="111" />
-              <circle cx="300" cy="260" r="205" />
-              <line x1="300" y1="260" x2="300" y2="55" />
-              <line x1="300" y1="260" x2="492" y2="130" />
-              <line x1="300" y1="260" x2="492" y2="370" />
-              <line x1="300" y1="260" x2="300" y2="465" />
-              <line x1="300" y1="260" x2="108" y2="370" />
-              <line x1="300" y1="260" x2="108" y2="130" />
-            </svg>
+          <section className="map-route-content" aria-label="Roteiro e contexto da tarefa">
+            <section className="map-route-summary" aria-labelledby="map-task-title">
+              <div className="map-route-summary-icon"><Target size={21} /></div>
+              <div className="map-route-summary-copy"><span>{task.client} · {task.project}</span><h3 id="map-task-title">{task.title}</h3><p>{task.expectedResult}</p></div>
+              <div className="map-route-progress"><strong>{completedSteps}/{task.steps.length}</strong><span>microtarefas</span><progress aria-label="Progresso das microtarefas" max={task.steps.length || 1} value={completedSteps} /></div>
+            </section>
 
-            <button className="map-center" onClick={() => setSelectedId("routine")} aria-label="Abrir rotina da tarefa atual">
-              <span><Brain size={25} /></span>
-              <small>TAREFA ATUAL</small>
-              <strong>{task.title}</strong>
-              <em>{completedSteps}/{task.steps.length || 1} etapas</em>
-              <b>Abrir rotina</b>
-            </button>
+            <section className="map-step-table-section" aria-labelledby="map-steps-title">
+              <header><div><span className="map-route-kicker"><ListChecks size={15} /> SEQUÊNCIA</span><h3 id="map-steps-title">Ordem de execução</h3></div>{nextStep && <span className="map-next-step"><ArrowRight size={14} /> Próxima: {nextStep.label}</span>}</header>
+              {task.steps.length ? (
+                <div className="map-table-scroll">
+                  <table className="map-step-table">
+                    <thead><tr><th scope="col">Ordem</th><th scope="col">Microtarefa</th><th scope="col">Progresso</th></tr></thead>
+                    <tbody>{task.steps.map((step, index) => (
+                      <tr key={step.id} className={step.done ? "is-done" : index === task.steps.findIndex((item) => !item.done) ? "is-next" : ""}>
+                        <td><span className="map-step-number">{index + 1}</span></td>
+                        <td><span className="map-step-copy"><ListChecks size={16} aria-hidden="true" /><span>{step.label}</span></span></td>
+                        <td><label className="map-step-toggle"><input type="checkbox" checked={step.done} onChange={() => onToggleStep(task.id, step.id)} aria-label={`${step.done ? "Desmarcar" : "Marcar"} microtarefa ${index + 1} como ${step.done ? "pendente" : "feita"}: ${step.label}`} /><span className="map-step-status">{step.done ? <><ThumbsUp size={14} aria-hidden="true" /> Feita</> : <>Pendente</>}</span></label></td>
+                      </tr>
+                    ))}</tbody>
+                  </table>
+                </div>
+              ) : <div className="map-step-empty"><ListChecks size={19} /><p>Esta demanda ainda não tem microtarefas cadastradas.</p></div>}
+            </section>
 
-            {nodes.map((node, index) => (
-              <button key={node.id} style={{ "--node-duration": `${5.5 + index * .55}s`, "--node-delay": `${index * -.8}s` } as React.CSSProperties} className={`map-node map-node-${node.id} ${selectedId === node.id ? "selected" : ""}`} onClick={() => setSelectedId(node.id)}>
-                <span>{node.icon}</span>
-                <strong>{node.label}</strong>
-              </button>
-            ))}
-          </section>
-
-          <aside className="map-inspector" aria-live="polite">
-            <span className="map-inspector-icon">{selected.icon}</span>
-            <small>{selected.label}</small>
-            <h3>{selected.title}</h3>
-            <p>{selected.detail}</p>
-
-            {selected.id === "memory" && (
-              <div className="map-action-panel">
-                <label htmlFor="return-point-map">Editar ponto de retomada</label>
-                <textarea id="return-point-map" rows={3} value={returnDraft} onChange={(event) => setReturnDraft(event.target.value)} />
+            <section className="map-route-criterion"><Target size={18} /><div><span>PRONTO QUANDO</span><p>{task.doneCondition}</p></div></section>
+            <div className="map-route-support-grid">
+              <section className="map-route-support-card">
+                <h3><RotateCcw size={16} /> Ponto de retomada</h3><p>{returnPoint || "Nenhum ponto de retomada salvo."}</p>
+                <label htmlFor="return-point-map">Editar ponto de retomada</label><textarea id="return-point-map" rows={3} value={returnDraft} onChange={(event) => setReturnDraft(event.target.value)} />
                 <button onClick={saveReturnPoint} disabled={!returnDraft.trim()}><Save size={15} /> Salvar retomada</button>
-              </div>
-            )}
-
-            {selected.id === "goal" && (
-              <div className="map-action-panel">
-                <div className="goal-meter"><span><i style={{ width: `${task.steps.length ? Math.round((completedSteps / task.steps.length) * 100) : 0}%` }} /></span><small>{completedSteps} de {task.steps.length} etapas concluídas</small></div>
-                <button className="map-secondary-action" onClick={() => setGoalExpanded((expanded) => !expanded)}><Target size={15} /> {goalExpanded ? "Ocultar critério" : "Ver critério de pronto"}</button>
-                {goalExpanded && <p className="map-expanded-copy">{task.doneCondition}</p>}
-              </div>
-            )}
-
-            {selected.id === "project" && (
-              <div className="map-action-panel map-resource-panel">
-                <span className="demo-data-label">DADOS DE DEMONSTRAÇÃO</span>
-                <div className="resource-list">{demoResources.map((resource) => (
-                  <button key={resource.id} className={selectedResourceId === resource.id ? "active" : ""} onClick={() => setSelectedResourceId(resource.id)}>
-                    {resource.kind === "Documento" ? <FileText size={15} /> : resource.kind === "Pasta" ? <FolderKanban size={15} /> : <Brain size={15} />}
-                    <span><strong>{resource.name}</strong><small>{resource.updated}</small></span>
-                    <ChevronRight size={14} />
-                  </button>
-                ))}</div>
-                <div className="resource-preview"><span>{selectedResource.kind}</span><p>{selectedResource.description}</p><button onClick={() => showFeedback(`${selectedResource.name} aberto na prévia.`)}><ExternalLink size={14} /> Abrir prévia</button></div>
-              </div>
-            )}
-
-            {selected.id === "routine" && (
-              <div className="map-action-panel map-step-list">
-                <span className="demo-data-label">ETAPAS DA TAREFA</span>
-                {task.steps.map((step) => (
-                  <label key={step.id} className={step.done ? "done" : ""}>
-                    <input type="checkbox" checked={step.done} onChange={() => onToggleStep(task.id, step.id)} />
-                    <span>{step.done && <Check size={12} />}</span>
-                    <p>{step.label}</p>
-                  </label>
-                ))}
-              </div>
-            )}
-
-            {selected.id === "evidence" && (
-              <div className="map-action-panel">
-                <span className="demo-data-label">EXEMPLO PREENCHIDO</span>
-                <label htmlFor="evidence-map">Link ou localização da prova</label>
-                <div className="map-inline-input"><Link2 size={15} /><input id="evidence-map" value={evidenceDraft} onChange={(event) => setEvidenceDraft(event.target.value)} /></div>
-                <button onClick={saveEvidence} disabled={!evidenceDraft.trim()}><FileCheck2 size={15} /> Guardar evidência</button>
-              </div>
-            )}
-
-            {selected.id === "captures" && (
-              <div className="map-action-panel">
-                <span className="demo-data-label">LEMBRETES DA TAREFA</span>
-                <div className="inspector-notes">{notes.slice(0, 3).map((note) => <span key={note.id}>{note.text}</span>)}</div>
-                <label htmlFor="capture-map">Novo lembrete</label>
-                <div className="map-inline-input"><NotebookPen size={15} /><input id="capture-map" value={captureDraft} onChange={(event) => setCaptureDraft(event.target.value)} placeholder="Guardar para depois" /></div>
-                <button onClick={saveCapture} disabled={!captureDraft.trim()}><Inbox size={15} /> Capturar sem interromper</button>
-              </div>
-            )}
-
+              </section>
+              <section className="map-route-support-card">
+                <h3><FileCheck2 size={16} /> Evidência</h3><p>{task.evidence || "Nenhuma evidência registrada."}</p>
+                <label htmlFor="evidence-map">Link ou localização da prova</label><div className="map-inline-input"><Link2 size={15} /><input id="evidence-map" value={evidenceDraft} onChange={(event) => setEvidenceDraft(event.target.value)} placeholder="Cole um link ou descreva onde a prova foi salva" /></div>
+                <button onClick={saveEvidence} disabled={!evidenceDraft.trim()}><Save size={15} /> Guardar evidência</button>
+              </section>
+              <section className="map-route-support-card map-route-notes">
+                <h3><NotebookPen size={16} /> Lembretes</h3>
+                {notes.length ? <ul>{notes.map((note) => <li key={note.id}>{note.text}</li>)}</ul> : <p>Nenhum lembrete guardado nesta tarefa.</p>}
+                <label htmlFor="capture-map">Novo lembrete</label><div className="map-inline-input"><NotebookPen size={15} /><input id="capture-map" value={captureDraft} onChange={(event) => setCaptureDraft(event.target.value)} placeholder="Guardar para depois" /></div>
+                <button onClick={saveCapture} disabled={!captureDraft.trim()}><Inbox size={15} /> Capturar lembrete</button>
+              </section>
+            </div>
             {feedback && <div className="map-feedback" role="status"><CheckCircle2 size={15} />{feedback}</div>}
-            <div className="map-safety"><CheckCircle2 size={16} /><span>Explorar o mapa não troca a tarefa atual. Alterações ficam registradas nela.</span></div>
-          </aside>
+          </section>
         </div>
       </dialog>
     </div>
