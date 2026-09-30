@@ -263,7 +263,10 @@ export function App() {
     setState(current => ({
       ...current,
       tasks: current.tasks.filter(item => item.id !== taskId),
-      events: current.events.filter(event => event.taskId !== taskId),
+      events: [
+        appendEvent({ actor: "pati", assignee: task.assignee, kind: "task_archived", taskId, description: "Demanda arquivada pela Pati; registro mantido no histórico." }),
+        ...current.events.filter(event => event.taskId !== taskId),
+      ],
       notifications: current.notifications.filter(notification => notification.taskId !== taskId),
     }));
   }

@@ -5,6 +5,58 @@ export function removedRequestIds(previousTasks, nextTasks) {
     .map(task => task.id);
 }
 
+export function protectCompletedTasks(previousState, nextState, role) {
+  const previousTasks = Array.isArray(previousState?.tasks) ? previousState.tasks : [];
+  const incomingTasks = Array.isArray(nextState?.tasks) ? [...nextState.tasks] : [];
+  const incomingEvents = Array.isArray(nextState?.events) ? nextState.events : [];
+  const incomingById = new Map(incomingTasks.map((task, index) => [task.id, index]));
+
+  for (const completed of previousTasks.filter(task => task.status === 'completed')) {
+    const index = incomingById.get(completed.id);
+    const archivedByPati = incomingEvents.some(event =>
+      event.taskId === completed.id && event.actor === 'pati' && event.kind === 'task_archived');
+    const eventIsNewerThanCompletion = kind => incomingEvents.some(event =>
+      event.taskId === completed.id && event.actor === 'pati' && event.kind === kind
+      && Number.isFinite(Date.parse(event.createdAt))
+      && Date.parse(event.createdAt) > Date.parse(completed.completedAt ?? completed.updatedAt ?? ''));
+
+    if (index === undefined) {
+      if (role === 'pati' && archivedByPati) continue;
+      incomingById.set(completed.id, incomingTasks.length);
+      incomingTasks.push(completed);
+      continue;
+    }
+
+    const incoming = incomingTasks[index];
+    const explicitlyReopened = role === 'pati' && incoming.status !== 'completed'
+      && eventIsNewerThanCompletion('task_interrupted');
+    if (explicitlyReopened) continue;
+
+    if (incoming.status !== 'completed') {
+      incomingTasks[index] = {
+        ...incoming,
+        status: 'completed',
+        ...(completed.completedAt ? { completedAt: completed.completedAt } : {}),
+        ...(completed.updatedAt ? { updatedAt: completed.updatedAt } : {}),
+      };
+    } else if (!incoming.completedAt && completed.completedAt) {
+      incomingTasks[index] = { ...incoming, completedAt: completed.completedAt };
+    }
+  }
+
+  const mergeById = (current, incoming) => [...new Map([
+    ...(Array.isArray(current) ? current : []),
+    ...(Array.isArray(incoming) ? incoming : []),
+  ].filter(item => typeof item?.id === 'string').map(item => [item.id, item])).values()];
+
+  return {
+    ...nextState,
+    tasks: incomingTasks,
+    events: mergeById(previousState?.events, incomingEvents),
+    notifications: mergeById(previousState?.notifications, nextState?.notifications),
+  };
+}
+
 const requestIdentityFields = new Set([
   'requester', 'requesterName', 'requesterEmail', 'requesterUid',
   'history', 'activity', 'archivedAt', 'archivedStatus', 'archivedBy', 'syncedAt',

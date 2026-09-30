@@ -2,7 +2,7 @@ import { onCall, HttpsError } from 'firebase-functions/v2/https';
 import { getFirestore, FieldValue } from 'firebase-admin/firestore';
 const roleForEmail = email => email === 'patricia@dg5.com.br' ? 'pati' : email === 'guilherme@dg5.com.br' ? 'gui' : 'atendimento';
 import { validateWorkspaceWrite } from './workspace-policy.js';
-import { planRequestMirror, removedRequestIds } from './workspace-sync-plan.js';
+import { planRequestMirror, protectCompletedTasks, removedRequestIds } from './workspace-sync-plan.js';
 
 export const saveTeamWorkspace = onCall({ region: 'us-central1', maxInstances: 1, memory: '256MiB' }, async request => {
   if (!request.auth) throw new HttpsError('unauthenticated', 'Entre na sua conta.');
@@ -11,9 +11,13 @@ export const saveTeamWorkspace = onCall({ region: 'us-central1', maxInstances: 1
   const workspace = db.doc('workspaces/pauta-fluxo');
   await db.runTransaction(async tx => {
     const current = await tx.get(workspace);
-    try { validateWorkspaceWrite(role, current.data(), request.data); }
+    if (!request.data || !Array.isArray(request.data.tasks) || !Array.isArray(request.data.events) || !Array.isArray(request.data.notifications)) {
+      throw new HttpsError('permission-denied', 'Pauta inválida.');
+    }
+    const merged = protectCompletedTasks(current.data(), request.data, role);
+    try { validateWorkspaceWrite(role, current.data(), merged); }
     catch (error) { throw new HttpsError('permission-denied', error.message); }
-    const { tasks, events, notifications, morningCapacity, afternoonCapacity, bufferMinutes, agendaPublishedAt } = request.data;
+    const { tasks, events, notifications, morningCapacity, afternoonCapacity, bufferMinutes, agendaPublishedAt } = merged;
     const state = { tasks, events, notifications, morningCapacity, afternoonCapacity, bufferMinutes, ...(agendaPublishedAt ? { agendaPublishedAt } : {}), syncedAt: FieldValue.serverTimestamp() };
     // Request ownership is read from its original document, never from the client workspace.
     const previousTasks = current.data()?.tasks ?? [];

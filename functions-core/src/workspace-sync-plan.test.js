@@ -1,6 +1,47 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import { planRequestMirror, removedRequestIds } from './workspace-sync-plan.js';
+import { planRequestMirror, protectCompletedTasks, removedRequestIds } from './workspace-sync-plan.js';
+
+test('a stale workspace save cannot reopen or remove a completed task', () => {
+  const completed = { id: 'r1', status: 'completed', completedAt: '2026-09-29T14:00:00.000Z', updatedAt: '2026-09-29T14:00:00.000Z' };
+  const priorEvent = { id: 'done', taskId: 'r1', actor: 'pati', kind: 'task_completed', createdAt: completed.completedAt };
+  const merged = protectCompletedTasks(
+    { tasks: [completed], events: [priorEvent], notifications: [] },
+    { tasks: [{ ...completed, status: 'in_review', completedAt: undefined }], events: [], notifications: [] },
+    'gui',
+  );
+
+  assert.equal(merged.tasks[0].status, 'completed');
+  assert.equal(merged.tasks[0].completedAt, completed.completedAt);
+  assert.deepEqual(merged.events, [priorEvent]);
+
+  const forgedReopen = protectCompletedTasks(
+    { tasks: [completed], events: [], notifications: [] },
+    { tasks: [{ ...completed, status: 'ready' }], events: [{ id: 'forged', taskId: 'r1', actor: 'pati', kind: 'task_interrupted', createdAt: '2026-09-29T14:01:00.000Z' }], notifications: [] },
+    'gui',
+  );
+  assert.equal(forgedReopen.tasks[0].status, 'completed');
+
+  const omitted = protectCompletedTasks({ tasks: [completed], events: [], notifications: [] }, { tasks: [], events: [], notifications: [] }, 'gui');
+  assert.deepEqual(omitted.tasks, [completed]);
+});
+
+test('Pati can explicitly reopen a completed task for adjustments or archive it', () => {
+  const completed = { id: 'r1', status: 'completed', completedAt: '2026-09-29T14:00:00.000Z', updatedAt: '2026-09-29T14:00:00.000Z' };
+  const reopened = protectCompletedTasks(
+    { tasks: [completed], events: [], notifications: [] },
+    { tasks: [{ ...completed, status: 'ready', completedAt: undefined }], events: [{ id: 'return', taskId: 'r1', actor: 'pati', kind: 'task_interrupted', createdAt: '2026-09-29T14:01:00.000Z' }], notifications: [] },
+    'pati',
+  );
+  assert.equal(reopened.tasks[0].status, 'ready');
+
+  const archived = protectCompletedTasks(
+    { tasks: [completed], events: [], notifications: [] },
+    { tasks: [], events: [{ id: 'archive', taskId: 'r1', actor: 'pati', kind: 'task_archived', createdAt: '2026-09-29T14:02:00.000Z' }], notifications: [] },
+    'pati',
+  );
+  assert.deepEqual(archived.tasks, []);
+});
 
 test('identifies only request documents removed from the manager workspace', () => {
   const previous = [
