@@ -1,0 +1,22 @@
+Oi, Pati!
+
+Segue o resumo das atividades de Guilherme registradas no Codex em 18/09/2026, das 00h às 17h30, no horário de Brasília.
+
+• Assertiva | Diagnóstico concluído; validação complementar pendente
+Guilherme pediu ajuda porque as palavras-chave não apareciam no diagnóstico de visualização de anúncios. A análise encontrou 32 palavras habilitadas e elegíveis e anúncios aprovados. O termo isolado “seguradora” não estava cadastrado; foram indicados testes com “seguradora em santa maria” e “seguro de carro”. A análise não confirmou erro geral de configuração, mas também não encerrou a investigação da ausência no simulador. Nenhuma campanha foi alterada.
+
+• Sebrae | Pesquisa concluída
+Solicitou uma tabela nacional das plataformas semelhantes ao UniO, com documentos exigidos e exceções. Foi entregue um mapeamento das 27 UFs, organizado por plataforma, documentação e particularidades de cada estado. O levantamento distinguiu requisitos recorrentes de exigências universais: não foi identificado um documento obrigatório único em todos os fluxos.
+
+• LinkedIn Ads e dashboard de mídia | Preparação local concluída; integração em andamento
+Guilherme retomou a implementação das habilidades de LinkedIn Ads. Foram preparados os procedimentos operacionais e um gerador local de requisições para grupos, campanhas e criativos, com 17 testes aprovados. Essa entrega é local: nenhuma conta foi conectada ou alterada, e a execução real ainda não foi validada.
+Depois, pediu a conciliação de um PR em rascunho com as alterações existentes e a implementação completa das funcionalidades no aplicativo. Esclareceu que o projeto correto era o dashboard de mídia. Às 17h30, essa conciliação e a implementação no dashboard ainda não tinham conclusão registrada.
+
+Pendências relevantes
+• Assertiva: o diagnóstico apontou duas campanhas principais com encerramento previsto para hoje, às 23h59. Ficaram pendentes a decisão sobre continuidade e os testes complementares no simulador.
+• LinkedIn/dashboard: concluir a conciliação do PR, implementar a conexão e validar o funcionamento real. A operação depende dos acessos e permissões do LinkedIn; testes locais não comprovam a integração em conta real.
+
+Cobertura: tarefas com data e hora no título, consultadas nas listagens e conversas do Codex, incluindo fixadas e a listagem de arquivadas, com complemento dos registros locais. A cobertura de anexos e saídas não expostas nas conversas é parcial. Foram excluídas rotinas automáticas sem participação de Guilherme, conversas sem o padrão de título solicitado e a preparação deste resumo.
+
+Abraço,
+Guilherme

@@ -1,0 +1,19 @@
+{
+  "date": "2026-10-07",
+  "window": "00:00-17:30 America/Sao_Paulo",
+  "sources": [
+    "listagem nativa recente e fixadas do Codex (limite 50)",
+    "threads elegíveis datadas: Vitale e DG5i Mercado",
+    "página de arquivadas consultada até cursor 2026-09-21"
+  ],
+  "excluded": [
+    "threads sem data/hora no título",
+    "automações sem participação humana: coleta fiscal e Radar/artigo"
+  ],
+  "coverage": "Completa dentro do filtro de títulos datados disponível nas listagens; sem lacuna arquivada na janela",
+  "status": "sent_and_readback_verified",
+  "duplicate_search": "no match",
+  "gmail_message_id": "1a1181bc14fb26d9",
+  "recipient_delivery": "unconfirmed",
+  "gmail_readback": "From, To, Cc, subject, body and SENT label verified"
+}

@@ -1,0 +1,20 @@
+{
+  "date": "2026-10-08",
+  "coverage": "Tarefas Codex com títulos datados [08/10 HH:mm], atividade 00:00-17:30 America/Sao_Paulo; threads automáticas sem participação humana filtradas; tarefas após 17:30 excluídas.",
+  "sources": [
+    "Listagem nativa: 50 threads recentes, incluindo fixadas/projetos disponíveis",
+    "Listagem nativa de arquivadas (página alcançou threads até 23/09)",
+    "Leitura das threads [08/10 16:41], [08/10 15:58], [08/10 08:15] e [08/10 08:09]"
+  ],
+  "excluded": "Tarefas com títulos sem timestamp; atividades após 17h30, incluindo UptimeRobot e monitoramento.",
+  "limitations": "Listagem recente limitada a 50. Resumo restrito às threads datadas encontradas; não inclui conversas não datadas nem arquivos anexos inacessíveis.",
+  "status": "sent_verified",
+  "messageId": "1a11d3f46d845cad",
+  "recipients": {
+    "to": "patricia@dg5.com.br",
+    "cc": "guilherme@dg5.com.br",
+    "from": "guilherme@dg5.com.br"
+  },
+  "sentSubject": "Resumo de atividades — Guilherme — 08/10/2026",
+  "readback": "SENT label; full readback matched From, To, Cc, subject and body; inbox delivery unconfirmed"
+}

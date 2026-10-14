@@ -1,0 +1,9 @@
+Oi, Pati!
+
+Resumo das atividades de hoje, entre 00h e 17h30:
+
+- **DG5i Paid Media Dashboard:** a conciliação local com a versão 0.31.0 e a refatoração de UX foram concluídas. TypeScript, build, 233 testes unitários e 41 testes de navegador passaram na cópia isolada. As alterações locais foram preservadas, sem publicação. A comparação visual final segue pendente porque as oito capturas originais não estavam disponíveis.
+- **Tarefas do Guilherme:** os status do espaço foram atualizados com base nos registros recentes. Dashboard e Vitale ficaram com avanços e pendências registrados; Radar, artigo e Stories constam bloqueados; Real Park aguarda definições. Itens sem evidência nova mantiveram o status anterior.
+- **Atalho do Codex no Windows:** foi criado um atalho com o ícone clássico. A troca persistente do ícone na barra de tarefas não foi confirmada.
+
+**Pendências:** disponibilizar as capturas originais para concluir a comparação visual do Dashboard; a limitação do ícone na barra de tarefas permanece.

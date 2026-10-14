@@ -1,0 +1,24 @@
+{
+  "date": "2026-09-17",
+  "mode": "explicit_user_requested_test",
+  "window": "00:00-17:30 America/Sao_Paulo",
+  "sent_at_local": "2026-09-18 10:04:46",
+  "status": "sent_verified_in_gmail",
+  "message_id": "1a0b49dbb631b17d",
+  "readback_match": true,
+  "sources": [
+    "native pinned/recent list and archive list",
+    "native reads of 10 eligible tasks",
+    "read-only SQLite lookup and session messages within date window"
+  ],
+  "title_filter": "date and time required",
+  "included_threads": [
+    "01a0af41-f217-7300-91e0-b87ae08e0418",
+    "01a0afb1-5adf-7610-8e64-f77ae3206ef4",
+    "01a086a9-2fa8-7220-bcc2-09dd4ba2db83",
+    "01a0af1f-50af-73b2-aab6-b2a89a1260e9",
+    "01a08653-9a4e-7200-8523-c8c2ceb9d62a"
+  ],
+  "duplicate_check": "regular message existed; no test message existed; user explicitly authorized test",
+  "recipient_delivery": "not_confirmed"
+}

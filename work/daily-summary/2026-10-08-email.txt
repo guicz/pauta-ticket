@@ -1,0 +1,19 @@
+Oi, Pati!
+
+Segue o resumo das atividades de hoje até 17h30:
+
+**DG5i | Radar e artigo**
+- **Concluído:** o Radar de IA foi enviado e confirmado em Enviados. O resumo reuniu três pautas, com as ressalvas registradas. Também foi identificada uma cópia adicional de origem incerta; não houve novo envio.
+- **Bloqueado:** o artigo separado não foi enviado. Após a correção, ainda excedia o limite de 1.200 caracteres e os ciclos previstos se esgotaram.
+
+**Skills e estratégia**
+- **Concluído:** foi criada e validada localmente a skill `dg5i-ceo`, com oito áreas de negócio e quatro referências. O uso do Jev foi recomendado como recurso opcional de avaliação, não como agente separado.
+- **Concluído:** a auditoria das skills encontrou riscos nos processos de sincronização e no relatório SEO, dependências sinalizadas e skills externas desatualizadas. A auditoria não alterou arquivos; as correções e atualizações ficaram pendentes.
+
+**Brandguide DG5i**
+- **Parcial:** as instruções foram ampliadas para separar a identidade atual do site do manual histórico e preservar liberdade criativa. A inspeção das referências visuais não pôde ser concluída porque os arquivos não estavam acessíveis.
+
+**Dashboard | notas fiscais e aportes**
+- **Parcial/bloqueado:** os catálogos foram exportados e a busca no Gmail não encontrou avisos fiscais novos no período consultado. A sessão autenticada do Chrome não correspondia a uma conta do catálogo; a verificação por conta não avançou. Nenhuma nota ou aporte foi gravado, e não se concluiu ausência de documentos ou pagamentos.
+
+**Pendências:** corrigir os riscos e atualizar as skills apontadas; retomar o artigo em outro ciclo; restaurar acesso compatível às contas para concluir a conferência fiscal e de aportes.

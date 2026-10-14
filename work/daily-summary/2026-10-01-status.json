@@ -1,0 +1,12 @@
+{
+  "date": "2026-10-01",
+  "window": "00:00-17:30 America/Sao_Paulo",
+  "sources": [
+    "Codex threads listing: pinned/recent",
+    "Codex archived threads listing: latest page",
+    "read_thread 01a0f7e2-7c95-70e0-9578-8557671eec9d"
+  ],
+  "coverage": "Timestamped task titles for 2026-10-01; excluded automated-only Real Park sync; no unavailable sources reported",
+  "status": "sent; readback verified headers and body; inbox delivery unconfirmed",
+  "gmail_message_id": "1a0f92e9dbd485f0"
+}

@@ -1,0 +1,12 @@
+Oi, Pati!
+
+Resumo das atividades de hoje, entre 00h e 17h30:
+
+**Artigos e automação editorial**
+- **Concluído:** ajustada e testada ponta a ponta a geração de artigo a partir do Radar, com revisão editorial obrigatória e envio verificado. O artigo de teste foi aprovado após ajustes.
+- **Solicitado e configurado:** a seleção das pautas futuras deve priorizar opinião e impacto nos negócios, reduzir o tom de notícia e o tecnicismo, explicar termos para leigos e incluir critérios de SEO. Os Dots da OpenAI foram indicados como exemplo de pauta de maior interesse.
+
+**Cobertura:** parcial. A consulta de tarefas recentes foi limitada às 50 mais recentes; também foram consultadas as arquivadas até ultrapassar a data de hoje. Foram consideradas apenas threads com título datado de 02/10 e atividade humana. Execuções automáticas sem participação foram excluídas.
+
+Abraço,
+Guilherme

@@ -1,0 +1,19 @@
+{
+  "date": "2026-09-25",
+  "window_local": "00:00-17:30 America/Sao_Paulo",
+  "sources": {
+    "codex_native_current_pinned_archived": "consulted",
+    "timestamped_task_threads_read": 7,
+    "automation_only_threads_excluded": true,
+    "local_session_records": "not needed"
+  },
+  "status": "sent_and_readback_verified",
+  "message_id": "1a0da4acb9caed3d",
+  "to": "patricia@dg5.com.br",
+  "cc": "guilherme@dg5.com.br",
+  "subject": "Resumo de atividades — Guilherme — 25/09/2026",
+  "gmail_sent_search_before_send": "no matches",
+  "gmail_readback": "From, To, Cc, subject, body, and SENT label verified",
+  "recipient_inbox_delivery": "unconfirmed",
+  "coverage": "complete for timestamped titles found in native Codex listings; automation-only checks and untimestamped conversations excluded"
+}

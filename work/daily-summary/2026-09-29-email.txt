@@ -1,0 +1,25 @@
+Oi, Pati!
+
+Resumo das atividades de Guilherme em 29/09, das 00h às 17h30:
+
+**Real Park**
+- **Concluído:** investigou a ausência de novos leads no Google Ads. A consulta registrou 8 leads no Ads e 8 na aba Google, com último registro em 12/09; não foram encontrados novos leads. Também corrigiu uma solicitação de filtro que era de outro sistema e a cancelou sem alterações.
+- **Concluído:** a pedido de Guilherme, a campanha Google foi reativada com término em 10/10/2026, mantendo R$ 150/dia. A elegibilidade foi confirmada; retomada de impressões não foi verificada.
+
+**WhatsApp e CRM**
+- **Em andamento:** comparou fornecedores para atendimento com IA sem API oficial. Após resposta do suporte, Socialmaker passou a ser a primeira opção para um teste mensal. Ainda faltam confirmar quais recursos estão incluídos na mesma versão e assinatura, dependência do computador, custos/limites e exportação.
+
+**DG5i**
+- **Concluído:** simplificou e refinou a arte do curso IA Essencial, ajustando margens e deixando o rosto mais natural.
+- **Concluído:** atualizou a base de conhecimento RAG e as instruções do atendente conforme o plano v2.1 e gerou PDFs conferidos.
+- **Em andamento:** discutiu como reduzir a repetição dos anúncios Meta preservando os formulários. Não há confirmação de alteração nas campanhas.
+- **Concluído:** localizou a conversa anterior usada para criar campanhas Meta sobre Processos e Dados.
+
+**Pendências**
+- Confirmar com Socialmaker os itens ainda em aberto antes de contratar.
+- Resolver a divergência entre a carga horária anunciada e os intervalos do plano do curso.
+- Definir uma forma de reduzir a repetição nos anúncios sem perder a captação por formulário.
+- Cobertura parcial: uma conversa sobre referências visuais de hoje não abriu para leitura; por isso, não consigo confirmar seu resultado.
+
+Abraço,
+Guilherme

@@ -1,0 +1,16 @@
+{
+  "date_local": "2026-10-05",
+  "window": "00:00-17:30 America/Sao_Paulo",
+  "sources": [
+    "Codex recent thread listing, limit 50",
+    "Codex archived thread listing, first page starting 2026-09-20",
+    "Four recent threads with titles dated [05/10 HH:mm]",
+    "Gmail Sent preflight and sent-message readback"
+  ],
+  "coverage": "Used only recent threads with today's timestamped title; archived first page contained no today's titled items. Other untimestamped recent conversations excluded per task rule.",
+  "status": "sent_and_readback_verified; recipient inbox delivery unconfirmed",
+  "message_id": "1a10dc862cfe2aa9",
+  "subject": "Resumo de atividades — Guilherme — 05/10/2026",
+  "to": "patricia@dg5.com.br",
+  "cc": "guilherme@dg5.com.br"
+}

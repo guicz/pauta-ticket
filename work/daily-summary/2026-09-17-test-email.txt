@@ -1,0 +1,21 @@
+Oi, Pati!
+
+Este é um envio de teste solicitado pelo Guilherme, usando as atividades de 17/09/2026, entre 00h e 17h30, no horário de Brasília. O filtro considera somente tarefas do Codex com data e hora no título. Por isso, o conteúdo é mais restrito que o resumo regular enviado ontem.
+
+• Assertiva Seguros | Concluído: diagnóstico de Meta Ads e Google Ads, com relatório em PDF e comparação entre dois períodos de 30 dias. A análise apontou interrupção de veiculação no Meta, baixo volume de Pesquisa no Google e problemas de mensuração. Guilherme discutiu o aprendizado das campanhas e recebeu uma sugestão de resposta à cobrança do cliente, sem confirmação de envio dessa resposta. Também foi preparado e ampliado um roteiro de teste com formulários nativos, adaptado à corretora, com critérios de qualidade, integração e atendimento. Essas entregas não alteraram as campanhas.
+
+• Dashboard de mídia paga | Concluído: Guilherme autenticou o acesso e restabeleceu o navegador para a coleta continuar. O resultado registrado foi de 28 contas conferidas, 27 notas disponíveis, 14 PDFs novos importados e 27 capturas de aportes processadas. A correção para notas emitidas a CPF foi publicada, com testes de downloads, painel do cliente e isolamento de acesso aprovados. A revisão das automações identificou lacunas na cobertura, na retomada de falhas, na atualização de campanhas e nos alertas após aportes. Foi esclarecido que o dashboard coleta diretamente das APIs e não depende da atualização da planilha Paid Media; a revisão não alterou os agendamentos.
+
+• LinkedIn Ads | Solicitado/em andamento: pesquisa da documentação e ampliação do agente para criar e gerenciar campanhas. Não há entrega final da integração confirmada no período.
+
+• Real Park | Organização concluída: a tarefa de sincronização de leads foi mantida no projeto, sem fixação e fora de seções personalizadas. A orientação foi incorporada à automação. Bloqueado: marcar automaticamente a tarefa como lida, pois o aplicativo não disponibilizava esse controle.
+
+Pendências ao final do período:
+- Assertiva: conferir o recebimento dos formulários, validar a mensuração e decidir a continuidade das campanhas-base com término registrado para 18/09.
+- Dashboard: tratar as lacunas de automação e recuperação por conta. Pelanda Google continuava sem nota localizada.
+- LinkedIn Ads: concluir e validar a integração solicitada.
+
+Cobertura: listagens nativas de tarefas fixadas, recentes e arquivadas, leitura das conversas e registros locais complementares. Foram excluídas conversas sem data e hora no título, verificações automáticas sem participação do usuário e a elaboração deste resumo. A cobertura de anexos e de saídas não disponíveis nas conversas é parcial. Os resultados acima refletem os registros de ontem, sem nova consulta às contas ou execução de tarefas de domínio.
+
+Abraço,
+Guilherme

@@ -1,0 +1,23 @@
+{
+  "date": "2026-10-13",
+  "cutoff_local": "17:30 America/Sao_Paulo",
+  "sources": [
+    "Codex list_threads: pinned and 50 recent",
+    "Codex list_archived_threads: page through 2026-09-27",
+    "read_thread: 3 eligible timestamped threads"
+  ],
+  "coverage": "Within the requested title filter; untimestamped conversations excluded.",
+  "status": "sent_and_readback_verified",
+  "prepared_at_local": "2026-10-13 17:34:15",
+  "gmail_message_id": "1a136f9e06c59bbc",
+  "sent_readback": {
+    "from": "guilherme@dg5.com.br",
+    "to": "patricia@dg5.com.br",
+    "cc": "guilherme@dg5.com.br",
+    "subject": "Resumo de atividades — Guilherme — 13/10/2026",
+    "sent_label_confirmed": true,
+    "body_confirmed": true
+  },
+  "recipient_delivery": "not_confirmed",
+  "sent_at_local": "2026-10-13 17:36:14"
+}

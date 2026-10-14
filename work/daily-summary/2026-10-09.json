@@ -1,0 +1,19 @@
+{
+  "date": "2026-10-09",
+  "timezone": "America/Sao_Paulo",
+  "period": "00:00-17:30",
+  "checked_at": "2026-10-09T17:33:23-03:00",
+  "sources": [
+    "Codex list_threads: 50 recent, filtered titles with [09/10 HH:mm]",
+    "Codex list_archived_threads: first page; cursor already reached 2026-09-24",
+    "Codex read_thread: 3 timestamped candidates; excluded automated monitor-only checks",
+    "Gmail Sent: duplicate checks before and after send; full readback confirmed headers and body"
+  ],
+  "status": "sent_and_readback_confirmed; inbox delivery unconfirmed",
+  "gmail_message_id": "1a1225f4140f4fbd",
+  "subject": "Resumo de atividades — Guilherme — 09/10/2026",
+  "from": "guilherme@dg5.com.br",
+  "to": "patricia@dg5.com.br",
+  "cc": "guilherme@dg5.com.br",
+  "coverage": "Timestamped titles only; no timestamp-free conversations included by requested filter."
+}

@@ -1,0 +1,29 @@
+{
+  "date": "2026-10-12",
+  "window": "00:00-17:30 America/Sao_Paulo",
+  "sources": [
+    "Codex list_threads recentes (50)",
+    "Codex list_archived_threads página disponível (limit 50; até 2026-09-26)",
+    "read_thread DG5i 12/10 08:00",
+    "read_thread resumo atual"
+  ],
+  "status": "sent_and_readback_confirmed",
+  "duplicate_search": "Gmail in:sent exact subject + to/cc returned no messages",
+  "coverage": "partial by rule: only timestamped [DD/MM HH:mm] Codex threads; ChatGPT threads without this title pattern excluded",
+  "gmail_message_id": "1a131d2ba6be3021",
+  "activity_summary": [
+    "DG5i Radar bloqueado antes de coleta por contrato ausente",
+    "Artigo diário não produzido por falta de briefing validado",
+    "Stories sem prévia, aprovação ou publicação"
+  ],
+  "email_body": "Olá, Pati!\n\nResumo das atividades de Guilherme no Codex em 12/10, entre 00h e 17h30:\n\n**DG5i**\n- **Bloqueado:** a coleta do Radar IA não começou porque o contrato editorial obrigatório não estava disponível. O artigo diário também não foi produzido, pois dependia do briefing validado de hoje.\n- **Stories:** sem prévia, aprovação ou publicação nesta execução.\n\n**Cobertura:** consultei as tarefas recentes e a página disponível de arquivadas. Considerei somente conversas com timestamp de 12/10; a única outra era uma verificação automática sem participação humana. Conversas do ChatGPT sem esse padrão de título não foram incluídas.\n\nPendência: disponibilizar o contrato editorial para retomar a coleta em uma execução futura.",
+  "readback": {
+    "from": "guilherme@dg5.com.br",
+    "to": "patricia@dg5.com.br",
+    "cc": "guilherme@dg5.com.br",
+    "subject": "Resumo de atividades — Guilherme — 12/10/2026",
+    "sent_label_confirmed": true,
+    "recipient_inbox_delivery_confirmed": false
+  },
+  "completed_at_local": "2026-10-12 17:34 America/Sao_Paulo"
+}

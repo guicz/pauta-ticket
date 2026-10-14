@@ -1,0 +1,20 @@
+{
+  "date": "2026-10-02",
+  "window": "00:00-17:30 America/Sao_Paulo",
+  "sources": [
+    "Codex list_threads: 50 recent and pinned entries",
+    "Codex archived task pages until dates older than 2026-10-02",
+    "Three date-stamped 2026-10-02 threads read; automatic-only fiscal run excluded",
+    "Gmail Sent pre-send duplicate search",
+    "Gmail sent-message readback"
+  ],
+  "status": "sent_and_readback_verified",
+  "coverage": "partial",
+  "gmail_message_id": "1a0fe5481c896170",
+  "recipients": {
+    "cc": "guilherme@dg5.com.br",
+    "to": "patricia@dg5.com.br"
+  },
+  "subject": "Resumo de atividades — Guilherme — 02/10/2026",
+  "delivery": "Gmail SENT confirmed; recipient inbox delivery unconfirmed"
+}

@@ -1,0 +1,44 @@
+{
+  "date": "2026-09-18",
+  "period": "00:00-17:30 America/Sao_Paulo",
+  "run_time": "2026-09-18T17:38:37-03:00",
+  "status": "sent_verified_in_gmail",
+  "message_id": "1a0b63dd5c73eef3",
+  "readback_match": true,
+  "recipient_delivery_confirmed": false,
+  "sources": {
+    "native": "list_threads (50 recent plus all pinned), list_archived_threads (30; newest before today), read_thread (14 candidates)",
+    "local": "read-only state_5.sqlite and referenced session JSONL; recovered current LinkedIn turns",
+    "thread_ids": [
+      "01a090ab-bb83-7322-8b87-16d610ff5dc4",
+      "01a0ab16-e2e6-7842-8eac-db6a25d4124d",
+      "01a0a9f3-7a50-79a1-8f68-675b96d83e31",
+      "01a0af1f-50af-73b2-aab6-b2a89a1260e9",
+      "01a086a9-2fa8-7220-bcc2-09dd4ba2db83",
+      "01a091be-90a4-7770-8978-6f325a45c22c",
+      "01a08653-9a4e-7200-8523-c8c2ceb9d62a",
+      "01a0b61c-87a3-7ba1-9291-0af2b4d13594",
+      "01a0b47e-c303-7cb2-a251-9af88df317d4",
+      "01a0b45f-585a-7981-a407-014ae79092fb",
+      "01a0b428-654e-7233-9b70-d569427744ef",
+      "01a0b388-982b-7252-8454-68570009c831",
+      "01a0b2e3-c1fc-7f30-9beb-d16a750f0fda",
+      "01a0abcd-18f8-7c30-9dfe-79d39b239c48"
+    ]
+  },
+  "included": [
+    "Assertiva diagnosis",
+    "Sebrae research",
+    "LinkedIn local preparation and dashboard continuation request"
+  ],
+  "excluded": [
+    "automated-only checks",
+    "titles without timestamp",
+    "summary preparation and test",
+    "older work without activity today"
+  ],
+  "limitations": [
+    "Attachments and unexposed outputs not independently reviewed"
+  ],
+  "duplicate_checks": 2
+}

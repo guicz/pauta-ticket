@@ -1,0 +1,27 @@
+Oi, Pati!
+
+Segue o resumo das atividades registradas em 17/09/2026, entre 00h e 17h30, no horário de Brasília.
+
+• Assertiva Seguros | Concluído: diagnóstico de Meta Ads e Google Ads, com relatório em PDF e comparação entre dois períodos de 30 dias. Foram identificados interrupção de veiculação no Meta, baixo volume de Pesquisa no Google e problemas de mensuração. Guilherme discutiu o período de aprendizado e recebeu uma sugestão de resposta ao cliente, sem promessa de melhora automática nem confirmação de envio dessa resposta. Também foi preparado e ampliado um roteiro para testar formulários nativos, adaptado à corretora, com critérios de qualidade, integração e atendimento. Nenhuma mudança nas campanhas foi registrada nessa entrega.
+
+• Dashboard de mídia paga | Concluído: após Guilherme autenticar o acesso e restabelecer o navegador, a coleta foi retomada. O registro final confirma 28 contas conferidas, 27 notas disponíveis, 14 PDFs novos importados e 27 capturas de aportes processadas. A correção para notas emitidas a CPF foi publicada, com testes de downloads, painel do cliente e isolamento de acesso aprovados. A revisão das automações identificou lacunas na cobertura e na recuperação de falhas. Também foi esclarecido que o dashboard coleta diretamente das APIs e não depende da atualização da planilha Paid Media; o agendamento do dashboard não foi alterado nessa revisão.
+
+• Zig Zag Play | Textos preparados: mensagem às gerências e regulamento da campanha Mês das Crianças, posteriormente ajustado ao retorno do cliente sobre valor efetivamente pago na mesma recarga, não acumulação de transações e cupons inválidos. Foram selecionadas cinco opções de nome, com justificativas e contexto, para a promoção da inauguração de Pelotas, ainda para aprovação do cliente. Para o banner, foi solicitada melhoria da identidade visual mantendo texto e logo; a conversa registra entrega de um PDF para impressão, mas o arquivo não pôde ser inspecionado nesta consolidação.
+
+• GESUL | Revisão concluída: análise e sugestões de texto para a landing page de gesso acartonado em Santa Maria. Na segunda conferência, a conversa ainda apontava trechos antigos na página, possivelmente por publicação pendente ou cache. Aplicação final dos ajustes não confirmada.
+
+• Boliche Sports Bar | Solicitado/em andamento: briefing para rebranding, considerando boliche, bar, gastronomia e convivência, com modernização da bola e preservação do reconhecimento da marca. A escolha da direção criativa ficou pendente; nova identidade final não confirmada.
+
+• Agente de mídia paga e organização | Solicitado/em andamento: pesquisa e integração de capacidades para criar e gerenciar campanhas no LinkedIn Ads. A execução foi interrompida após a pesquisa, sem integração concluída. Concluído: ajuste das instruções da automação de leads do Real Park para permanecer no projeto e sem fixação. A marcação automática como lida ficou bloqueada pela ausência desse controle no aplicativo.
+
+• Edição de imagem | Solicitado: substituição de um caminhão na imagem, preservando cenário, ângulo e detalhes. Resultado final não confirmado no histórico acessível.
+
+Pendências relevantes:
+- Assertiva: conferir recebimento dos formulários, validar mensuração e decidir a continuidade das campanhas-base com término registrado para 18/09.
+- Dashboard: tratar as lacunas de automação e retomar ajustes anteriores ainda sem conclusão; Pelanda Google segue sem nota localizada.
+- Concluir a integração do LinkedIn Ads, conferir a publicação dos ajustes da GESUL e obter as decisões criativas/comerciais pendentes.
+
+Cobertura: tarefas fixadas e recentes, conversas disponíveis no aplicativo, listagem de arquivadas e registros locais complementares. Algumas imagens, anexos e saídas do aplicativo não estavam integralmente acessíveis; nesses casos, a entrega foi qualificada acima. Verificações automáticas sem participação do usuário e a elaboração deste resumo foram excluídas.
+
+Abraço,
+Guilherme

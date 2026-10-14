@@ -1,0 +1,16 @@
+{
+  "date": "2026-09-24",
+  "timezone": "America/Sao_Paulo",
+  "period": "00:00-17:30",
+  "sources": [
+    "Codex pinned/recent/project task list (limit 50)",
+    "Six timestamped Codex task reads",
+    "Gmail Sent search (no duplicate found)"
+  ],
+  "coverage": "partial: only timestamped Codex task titles included; untitled ChatGPT conversations excluded",
+  "status": "prepared_not_sent",
+  "blocker": "Gmail connector exposes read/search but no send tool in this session; cutoff not yet passed at collection time",
+  "duplicate_search": "no matching Sent message found",
+  "message_id": null,
+  "run_time": "2026-09-24 current run"
+}

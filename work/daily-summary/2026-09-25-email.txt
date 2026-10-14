@@ -1,0 +1,33 @@
+Oi, Pati! Segue o resumo das atividades de hoje, até 17h30.
+
+**DG5i | campanhas Meta**
+- **Analisado:** duas campanhas somavam R$ 32,08 gastos, 532 impressões e cinco cliques, sem leads exibidos. A amostra ainda é pequena para concluir que a estratégia falhou.
+- **Em andamento, bloqueado:** após autorização, foram preparados rascunhos de três anúncios, dois formulários simplificados, ajuste geográfico para Santa Maria e novas peças verticais para medir interesse. **Nada foi publicado.** O Meta bloqueou a validação dos três anúncios com o erro #2446880 e algumas prévias ficaram em branco; os formulários anteriores seguem vinculados.
+
+**DG5i | Google Ads**
+- **Concluído:** preparados CSVs com 51 linhas de palavras-chave em seis grupos e 26 sugestões de negativas, mantidos pausados para revisão.
+- **Pendente:** a URL final ficou vazia por falta das páginas de destino. A adaptação para importação no Meta e a ampliação das palavras-chave foram solicitadas, mas não ficaram concluídas nesta conversa.
+
+**Real Park**
+- **Concluído:** análise agregada de 110 leads, com horários, objetivo, prazo e origem, e criação de um infográfico com a identidade visual do empreendimento. O arquivo não expõe dados individuais.
+
+**Dashboard de tráfego**
+- **Concluído e publicado:** versão 0.29.4 com link “Ver detalhes da captura” abrindo as informações em modal. A revisão recebeu 100% do tráfego e as verificações de saúde, login e versão pública foram confirmadas.
+
+**Contrato de landing page**
+- **Concluído como minuta:** revisado para um único serviço de landing page, sem WordPress e sem Anexo I. A divisão de pagamento proposta em 20%/60%/20% ainda precisa ser confirmada antes da assinatura.
+
+**Empório do Frango**
+- **Concluído:** explicadas as recomendações de segurança exibidas pela Meta para a cliente. A captura não confirma invasão ou bloqueio; nenhuma configuração foi alterada.
+
+**Acesso ao ChatGPT Classic**
+- **Em andamento:** orientado novo teste de login em janela anônima. Falta confirmar se o acesso é pelo Codex ou pelo ChatGPT no navegador para definir o próximo passo.
+
+**Pendências relevantes**
+- Resolver a validação do Meta antes de publicar os rascunhos.
+- Definir as páginas de destino do Google Ads e concluir a adaptação solicitada para Meta.
+- Confirmar a divisão de pagamento e completar os dados ainda em aberto no contrato.
+- Identificar onde ocorre a falha de login do ChatGPT Classic.
+
+Abraço,
+Guilherme

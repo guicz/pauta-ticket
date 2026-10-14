@@ -1,0 +1,16 @@
+{
+  "date": "2026-09-18",
+  "run_time_local": "2026-09-18 09:52:54",
+  "timezone": "America/Sao_Paulo",
+  "status": "not_sent_before_scheduled_cutoff",
+  "message_id": null,
+  "sources": [
+    "native list_threads: pinned and 50 recent, including app conversations",
+    "native read_thread: current automation task",
+    "automation.toml: ACTIVE weekdays 17:30",
+    "Gmail Sent search: no matching summary for 18/09/2026",
+    "PAINEL.md: stale August hub, not used for activity claims"
+  ],
+  "coverage": "Preflight only. Daily activity turns and relevant archives must be collected at or after 17:30; no activity report prepared.",
+  "next_action": "At scheduled 17:30 run, collect evidence from timestamped titles, exclude automated-only work and this summary, search Sent again, send once and verify readback."
+}

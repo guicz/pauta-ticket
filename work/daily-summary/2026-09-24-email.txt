@@ -1,0 +1,20 @@
+Assunto: Resumo de atividades — Guilherme — 24/09/2026
+
+Oi, Pati!
+
+Segue o resumo das atividades registradas hoje até o momento:
+
+• Meta Ads / dg5i-ads-agent — Foi solicitada a configuração de documento de segmentação para campanhas de formação em IA. A execução via API foi investigada, mas não havia conector/executor Meta disponível e a autorização de escrita/publicação não estava concedida. Nenhuma alteração ou publicação foi feita. (Bloqueado.)
+
+• Real Park — Duas sincronizações Google da aba de leads conferiram os registros existentes. Em ambas, os oito registros já constavam na planilha; nenhuma linha nova foi acrescentada. (Concluído.)
+
+• Conteúdo DG5i — O Radar diário foi enviado e confirmado. O artigo sobre preço de modelos de IA ficou bloqueado após três ciclos de revisão editorial, por reprovação do gate; não foi enviado. (Radar concluído; artigo bloqueado.)
+
+• Sicredi Sementes — Foi preparado o plano para duas campanhas de YouTube em sequência, com criativos e links UTM. A configuração no Google Ads não foi concluída: a interface apresentou erro e os vídeos ainda não estavam disponíveis no seletor. O plano segue aguardando continuidade e revisão; nada foi ativado. (Em andamento/bloqueado.)
+
+• Skills DG5i — Há uma tarefa datada indicando versionamento e publicação de skills como concluídos. (Concluído; detalhes limitados nesta leitura.)
+
+Pendências: retomar a configuração de Sicredi quando o Google Ads permitir; revisar e destravar o artigo antes de qualquer envio; confirmar o documento de segmentação Meta por uma rota autorizada. A cobertura considera tarefas Codex com título datado de hoje, conforme o critério definido. Conversas ChatGPT sem título nesse formato foram excluídas; seus turnos não foram usados.
+
+Abraço,
+Guilherme

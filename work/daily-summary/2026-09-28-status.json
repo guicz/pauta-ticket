@@ -1,0 +1,24 @@
+{
+  "date": "2026-09-28",
+  "window_local": "00:00-17:30 America/Sao_Paulo",
+  "sources": {
+    "gmail_sent_duplicate_check": "no matching email found before send",
+    "native_codex_active_listing": "consulted, limit 50",
+    "native_codex_archived_listing": "consulted; first archived page included 28/09 and next page boundary was 27/09",
+    "threads_read": [
+      "[28/09 10:10]🔮✅🛠️ Largura e espaçamentos padronizados no…",
+      "[28/09 15:49]✅📊 Correção da auditoria pelo painel oficial",
+      "[28/09 08:21]✨🤖📊 Radar IA diário DG5i",
+      "[28/09 03:49]✨✅📊 Real Park: sincronização sem mudanças",
+      "[28/09 08:33]✨❌📊 Placar verificado; HOT DOG bloqueada",
+      "[28/09 08:00]✨✅💬 Agente OpenAI: falha de contenção",
+      "[28/09 17:33]✨✅📊 Campanha Meta atualizada em rascunho"
+    ],
+    "partial_coverage": "One pinned conversation about campaigns/presentation could not be read; final status of the separate LinkedIn article was unavailable."
+  },
+  "status": "sent_once_and_readback_verified",
+  "gmail_message_id": "1a0e9be130abbb82",
+  "readback": "SENT label and From/To/Cc/Subject/body confirmed",
+  "recipient_inbox_delivery": "unconfirmed",
+  "sent_at_local": "2026-09-28 17:39:03 America/Sao_Paulo"
+}

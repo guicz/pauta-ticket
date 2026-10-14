@@ -1,0 +1,33 @@
+Oi, Pati,
+
+Segue o resumo das atividades registradas hoje no Codex, entre 00h e 17h30 (horário de Brasília).
+
+DG5i Ads Agent e campanhas Meta
+• Concluído: foi preparado e validado um arquivo XLSX para importação em massa de públicos no Meta Ads, com Brasil, Santa Maria e retargeting. A conversa orientou conferir o modelo exportado da própria conta e deixar as campanhas em rascunho; isso não equivale a campanha publicada ou ativada.
+• Em andamento: houve preparação de campanhas e rascunhos Meta para formação em IA, além de ajustes de idioma em português e alinhamento da versão canônica do Ads Agent. A tarefa permanecia em andamento no corte.
+• Em andamento: a integração do Instagram por cliente no dashboard avançou para uma etapa de deploy de versão para teste. O fluxo real de autorização, seleção de perfil, isolamento entre clientes e coleta de métricas ainda não estava validado até 17h30.
+
+Dashboard de tráfego
+• Concluído e publicado: a V2 opcional das abas de clientes e áreas internas foi publicada junto com a atualização do modelo de relatórios para GPT-6 Luna. A verificação registrada confirmou a revisão ativa, tráfego direcionado, health OK, login Google e testes de build e interface aprovados.
+• Em andamento: continuava a investigação/configuração para conectar Instagram por cliente, com testes reais ainda pendentes.
+
+Conteúdo e pesquisa
+• Concluído como preparação: foram organizadas palavras-chave da DG5i em temas e materiais para Google Ads e Meta Ads. Também foram discutidas opções de segmentação e importação em massa. A preparação não confirma publicação de anúncios.
+• Em andamento: foi feita pesquisa sobre regras, condições, vantagens e riscos da tirzepatida manipulada no Brasil, para subsidiar possível artigo e debate interno.
+• Concluído: foi solicitado e entregue um artigo para WordPress com os ajustes de posicionamento e credibilidade discutidos.
+• Concluído: foram criadas versões visuais de uma imagem e trabalhada uma transformação em personagem.
+• Concluído: foi criado método de estilo visual com base em exemplos discutidos.
+
+Outros assuntos
+• Concluído: o manifest JSON foi ajustado conforme solicitado.
+• Concluído como orientação: foram respondidas dúvidas sobre divisão de aplicações e segmentação de Meta Ads, incluindo o uso de planilha de importação.
+
+Pendências relevantes
+• Validar o fluxo real de Instagram com uma operadora e um cliente autorizado, inclusive separação de conexões entre clientes e coleta de métricas.
+• Conferir os rascunhos e o XLSX no Ads Manager da conta antes de ativar campanhas. Não há confirmação de ativação ou publicação neste resumo.
+• Confirmar a conclusão dos ajustes Meta/Ads Agent, que ainda estavam em andamento no corte.
+
+Cobertura: usei a listagem e leitura nativas das tarefas com título no formato datado. O registro local completo do dia não foi consultado; a cobertura de conversas e tarefas fora da listagem disponível pode ser parcial. Desconsiderei as atividades iniciadas depois das 17h30 e não tratei esta elaboração como atividade do dia.
+
+Abraço,
+Guilherme

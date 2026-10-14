@@ -1,0 +1,40 @@
+{
+  "date": "2026-09-17",
+  "window": "00:00-17:30 America/Sao_Paulo",
+  "status": "sent_verified_in_gmail",
+  "duplicateSearch": "no_matches",
+  "sources": [
+    "01a090ab-bb83-7322-8b87-16d610ff5dc4",
+    "01a0ab16-e2e6-7842-8eac-db6a25d4124d",
+    "01a0a9f3-7a50-79a1-8f68-675b96d83e31",
+    "01a0aa74-8903-7060-9130-80735c134b56",
+    "01a0af41-f217-7300-91e0-b87ae08e0418",
+    "01a0af1f-50af-73b2-aab6-b2a89a1260e9",
+    "01a0a72a-b8c0-7a71-9072-8527b7a43e29",
+    "01a086a9-2fa8-7220-bcc2-09dd4ba2db83",
+    "6aac4c90-090c-83e9-a747-f2a677124749",
+    "6aac4b2f-a78c-83e9-b981-8bef8762fe53",
+    "01a08653-9a4e-7200-8523-c8c2ceb9d62a",
+    "01a0b0f6-2374-7793-87c1-a21f836cb012",
+    "6a8dd63b-a668-83e9-961a-b220c9e76ac3",
+    "696fa3b0-9240-8333-9550-06b911ec5ee3",
+    "6aac410e-a620-83e9-8552-b9e0d777f1b3",
+    "6aabe06f-4ca0-83e9-a702-bbc94f8c3617",
+    "6aab1948-5e04-83e9-a36d-59e136bad949",
+    "6aa2cf4f-eedc-83e9-bcf3-757a99ea1ef8",
+    "01a0b050-dba6-78c3-acaf-526016607782",
+    "01a0afb1-5adf-7610-8e64-f77ae3206ef4",
+    "01a091be-90a4-7770-8978-6f325a45c22c",
+    "01a0afab-185c-7832-aa7c-14847fa96b27",
+    "01a09ffa-efa0-7062-b9d2-ccee532e1400",
+    "01a063a1-4774-7643-b16b-b2af59d06b4f"
+  ],
+  "additionalSources": [
+    "native archived listing 50, newest before today",
+    "read-only state_5.sqlite and referenced JSONL logs"
+  ],
+  "coverage": "Attachments and some app outputs partially unavailable; automated-only work excluded",
+  "messageId": "1a0b117d781b54f0",
+  "verifiedAt": "2026-09-17T17:39:35.9554376-03:00",
+  "readbackMatch": true
+}

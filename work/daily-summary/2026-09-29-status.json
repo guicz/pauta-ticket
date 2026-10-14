@@ -1,0 +1,13 @@
+{
+  "date": "2026-09-29",
+  "run_time": "2026-09-29 17:48 America/Sao_Paulo",
+  "window": "00:00-17:30 America/Sao_Paulo",
+  "sources": ["Gmail Enviados search", "Codex pinned and recent threads", "Codex archived threads (4 pages)", "Codex read_thread on timestamped 29/09 tasks"],
+  "coverage": "partial: one timestamped visual-reference thread could not be read; no 29/09 titles found in archived pages",
+  "status": "sent_and_readback_verified",
+  "gmail_message_id": "1a0eeed86914a217",
+  "to": "patricia@dg5.com.br",
+  "cc": "guilherme@dg5.com.br",
+  "subject": "Resumo de atividades — Guilherme — 29/09/2026",
+  "delivery_to_recipient_inbox": "unconfirmed"
+}
